@@ -1,0 +1,25 @@
+{
+  "name": "openplanetarium",
+  "displayName": "Openplanetarium",
+  "description": "Language server for Openplanet's Angelscript",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.144.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "angelscript",
+      "aliases": ["Angelscript", "angelscript"],
+      "extensions": [".as"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "angelscript",
+      "scopeName": "source.angelscript",
+      "path": "./syntaxes/angelscript.tmLanguage.json"
+    }]
+  }
+}
