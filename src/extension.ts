@@ -1,5 +1,6 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
+import * as fs from 'fs'
+import * as path from 'path'
+
 import * as vscode from 'vscode'
 
 const NAME = 'openplanetarium'
@@ -23,23 +24,30 @@ export function activate(context: vscode.ExtensionContext) {
             return
         }
 
-        log(JSON.stringify(getSettings(), undefined, '\t'))
+        const cfg = getConfig()
+        // log(JSON.stringify(cfg, undefined, '\t'))
 
         if (e.affectsConfiguration(`${NAME}.OpenplanetNextFolder`)) {
-            log(`${NAME}.OpenplanetNextFolder changed`)
+            // log(`${NAME}.OpenplanetNextFolder changed`)
+            if (cfg.OpenplanetNextFolder.length > 0 && !fs.existsSync(cfg.OpenplanetNextFolder)) {
+                const msg = `folder not found: ${cfg.OpenplanetNextFolder}`
+                log(msg, 'warning')
+                vscode.window.showWarningMessage(msg)
+            }
         }
 
         if (e.affectsConfiguration(`${NAME}.TrackmaniaNextInstallFolder`)) {
-            log(`${NAME}.TrackmaniaNextInstallFolder changed`)
+            // log(`${NAME}.TrackmaniaNextInstallFolder changed`)
+            if (cfg.TrackmaniaNextInstallFolder.length > 0 && !fs.existsSync(cfg.TrackmaniaNextInstallFolder)) {
+                const msg = `folder not found: ${cfg.TrackmaniaNextInstallFolder}`
+                log(msg, 'warning')
+                vscode.window.showWarningMessage(msg)
+            }
         }
     }))
 }
 
-export function deactivate() {
-    log('Openplanetarium is no longer active :(')
-}
-
-function getSettings(): vscode.WorkspaceConfiguration {
+function getConfig(): vscode.WorkspaceConfiguration {
     return vscode.workspace.getConfiguration(NAME)
 }
 
