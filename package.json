@@ -31,6 +31,25 @@
 				"title": "Hello World"
 			}
 		],
+		"configuration": [
+			{
+				"title": "Openplanetarium",
+				"properties": {
+					"openplanetarium.OpenplanetNextFolder": {
+						"order": 0,
+						"type": "string",
+						"default": "",
+						"markdownDescription": "Path to OpenplanetNext folder.\n\nTypically: `C:/Users/<USERNAME>/OpenplanetNext/`"
+					},
+					"openplanetarium.TrackmaniaNextInstallFolder": {
+						"order": 1,
+						"type": "string",
+						"default": "",
+						"markdownDescription": "Path to Trackmania (2020) install folder.\n\nTypically: `C:/Program Files (x86)/Ubisoft/Ubisoft Game Launcher/games/Trackmania/`"
+					}
+				}
+			}
+		],
 		"languages": [
 			{
 				"id": "angelscript",
