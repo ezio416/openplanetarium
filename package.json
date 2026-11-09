@@ -3,13 +3,34 @@
 	"displayName": "Openplanetarium",
 	"description": "Language server for Openplanet's Angelscript",
 	"version": "0.0.0",
+	"publisher": "Ezio416",
 	"engines": {
 		"vscode": "^1.126.0"
 	},
+	"activationEvents": [],
+	"main": "./out/extension.js",
 	"categories": [
 		"Programming Languages"
 	],
+	"devDependencies": {
+		"@types/node": "^24.x",
+		"@types/vscode": "^1.126.0",
+		"typescript": "^6.0.3"
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"pretest": "npm run compile",
+		"test": "vscode-test"
+	},
 	"contributes": {
+		"commands": [
+			{
+				"command": "openplanetarium.helloWorld",
+				"title": "Hello World"
+			}
+		],
 		"languages": [
 			{
 				"id": "angelscript",
@@ -30,8 +51,5 @@
 				"path": "./syntaxes/angelscript.tmLanguage.json"
 			}
 		]
-	},
-	"devDependencies": {
-		"js-yaml": "^5.5.0"
 	}
 }
