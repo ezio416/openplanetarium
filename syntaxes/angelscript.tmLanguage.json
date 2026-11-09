@@ -1,32 +1,288 @@
 {
-	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-	"name": "Angelscript",
+	"name": "angelscript",
+	"displayName": "Angelscript",
+	"scopeName": "source.angelscript",
 	"patterns": [
 		{
-			"include": "#keywords"
+			"include": "#comment"
 		},
 		{
-			"include": "#strings"
+			"include": "#keyword"
+		},
+		{
+			"include": "#number"
+		},
+		{
+			"include": "#preprocessor"
+		},
+		{
+			"include": "#string"
+		},
+		{
+			"include": "#terminal"
+		},
+		{
+			"include": "#type"
+		},
+		{
+			"include": "#identifier"
 		}
 	],
 	"repository": {
-		"keywords": {
-			"patterns": [{
-				"name": "keyword.control.angelscript",
-				"match": "\\b(if|while|for|return)\\b"
-			}]
-		},
-		"strings": {
-			"name": "string.quoted.double.angelscript",
-			"begin": "\"",
-			"end": "\"",
+		"comment": {
 			"patterns": [
 				{
-					"name": "constant.character.escape.angelscript",
-					"match": "\\\\."
+					"name": "comment.line.double-slash.angelscript",
+					"begin": "//",
+					"beginCaptures": {
+						"1": {
+							"name": "punctuation.definition.comment.angelscript"
+						}
+					},
+					"end": "(?=\\n)"
+				},
+				{
+					"name": "comment.block.angelscript",
+					"begin": "(\\/\\*)",
+					"beginCaptures": {
+						"1": {
+							"name": "punctuation.definition.comment.begin.angelscript"
+						}
+					},
+					"end": "(\\*\\/)",
+					"endCaptures": {
+						"1": {
+							"name": "punctuation.definition.comment.end.angelscript"
+						}
+					}
+				}
+			]
+		},
+		"keyword": {
+			"patterns": [
+				{
+					"name": "constant.language.angelscript",
+					"match": "\\b(false|null|true)\\b"
+				},
+				{
+					"name": "keyword.control.angelscript",
+					"match": "\\b(break|case|continue|default|return)\\b"
+				},
+				{
+					"name": "keyword.declaration.angelscript",
+					"match": "\\b(class|enum|from|funcdef|import|interface|namespace)\\b"
+				},
+				{
+					"name": "keyword.modifier.angelscript",
+					"match": "\\b(abstract|const|final|mixin|override|private|protected|shared)\\b"
+				},
+				{
+					"name": "keyword.operator.access.member.angelscript",
+					"match": "\\."
+				},
+				{
+					"name": "keyword.operator.access.scope.angelscript",
+					"match": "(::)"
+				},
+				{
+					"name": "keyword.operator.arithmetic.angelscript",
+					"match": "\\+|-|\\*|\\/|%"
+				},
+				{
+					"name": "keyword.operator.comparison.angelscript",
+					"match": "<|>|==|!=|<=|>=|\\bis\\b|!is\\b"
+				},
+				{
+					"name": "keyword.operator.assignment.angelscript",
+					"match": "="
+				},
+				{
+					"name": "keyword.operator.decrement.angelscript",
+					"match": "--"
+				},
+				{
+					"name": "keyword.operator.increment.angelscript",
+					"match": "\\+\\+"
+				},
+				{
+					"name": "keyword.operator.logical.angelscript",
+					"match": "\\b(and|or|xor)\\b|(&&|\\|\\||!|\\^)"
+				},
+				{
+					"begin": "(\\?)",
+					"beginCaptures": {
+						"1": {
+							"name": "keyword.operator.ternary.true.angelscript"
+						}
+					},
+					"end": "(:)",
+					"endCaptures": {
+						"1": {
+							"name": "keyword.operator.ternary.false.angelscript"
+						}
+					},
+					"patterns": [
+						{
+							"include": "$base"
+						}
+					]
+				},
+				{
+					"name": "keyword.operator.inheritance.angelscript",
+					"match": "(:)"
+				},
+				{
+					"name": "keyword.other.angelscript",
+					"match": "\\b(function|super|this)\\b"
+				},
+				{
+					"name": "keyword.reference.in.angelscript",
+					"match": "&\\s*in"
+				},
+				{
+					"name": "keyword.reference.inout.angelscript",
+					"match": "&\\s*inout"
+				},
+				{
+					"name": "keyword.reference.out.angelscript",
+					"match": "&\\s*out"
+				},
+				{
+					"name": "keyword.statement.angelscript",
+					"match": "\\b(catch|do|else|for|foreach|if|switch|try|while)\\b"
+				},
+				{
+					"match": "\\b(cast)\\s*<\\s*\\b([A-Za-z_][A-Za-z0-9_]*)\\b\\s*@?\\s*>",
+					"captures": {
+						"1": {
+							"name": "keyword.other.cast.angelscript"
+						},
+						"2": {
+							"name": "entity.name.type.angelscript"
+						}
+					}
+				}
+			]
+		},
+		"number": {
+			"patterns": [
+				{
+					"name": "constant.numeric.hexadecimal.angelscript",
+					"match": "0[bB][01]+"
+				},
+				{
+					"name": "constant.numeric.float.angelscript",
+					"match": "[0-9]*\\.[0-9]*[df]?"
+				},
+				{
+					"name": "constant.numeric.hexadecimal.angelscript",
+					"match": "0[xX][0-9a-fA-F]+"
+				},
+				{
+					"name": "constant.numeric.integer.angelscript",
+					"match": "[0-9]+"
+				},
+				{
+					"name": "constant.numeric.octal.angelscript",
+					"match": "0[oO][0-7]+"
+				}
+			]
+		},
+		"preprocessor": {
+			"name": "meta.preprocessor.angelscript",
+			"begin": "^#",
+			"end": "(?=\\n)"
+		},
+		"string": {
+			"patterns": [
+				{
+					"name": "string.quoted.single.angelscript",
+					"begin": "'",
+					"end": "'",
+					"patterns": [
+						{
+							"name": "constant.character.escape.angelscript",
+							"match": "\\\\."
+						},
+						{
+							"name": "constant.character.escape.line-continuation.angelscript",
+							"match": "(\\\\)\\n"
+						}
+					]
+				},
+				{
+					"name": "string.quoted.double.angelscript",
+					"begin": "\"",
+					"end": "\"",
+					"patterns": [
+						{
+							"name": "constant.character.escape.angelscript",
+							"match": "\\\\."
+						},
+						{
+							"name": "constant.character.escape.line-continuation.angelscript",
+							"match": "(\\\\)\\n"
+						}
+					]
+				}
+			]
+		},
+		"terminal": {
+			"name": "punctuation.terminal.angelscript",
+			"match": ";"
+		},
+		"type": {
+			"name": "storage.type.primitive.angelscript",
+			"match": "\\b(auto|bool|double|float|int|int8|int16|int32|int64|uint|uint8|uint16|uint32|uint64|void)\\b"
+		},
+		"identifier": {
+			"patterns": [
+				{
+					"match": "\\b([A-Za-z_][A-Za-z0-9_]*)\\b\\s*\\(",
+					"captures": {
+						"1": {
+							"name": "entity.name.function.angelscript"
+						}
+					}
+				},
+				{
+					"match": "\\b([A-Za-z_][A-Za-z0-9_]*)\\b\\s*(::)",
+					"captures": {
+						"1": {
+							"name": "entity.name.namespace.angelscript"
+						},
+						"2": {
+							"name": "keyword.operator.access.scope.angelscript"
+						}
+					}
+				},
+				{
+					"match": "\\b([A-Za-z_][A-Za-z0-9_]*)\\b\\s*(\\.)",
+					"captures": {
+						"1": {
+							"name": "variable.class.angelscript"
+						},
+						"2": {
+							"name": "keyword.operator.access.member.angelscript"
+						}
+					}
+				},
+				{
+					"match": "\\b([A-Za-z_][A-Za-z0-9_]*)\\b\\s*(@)",
+					"captures": {
+						"1": {
+							"name": "entity.name.type.angelscript"
+						},
+						"2": {
+							"name": "keyword.operator.handle.angelscript"
+						}
+					}
+				},
+				{
+					"name": "entity.name.angelscript",
+					"match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b"
 				}
 			]
 		}
-	},
-	"scopeName": "source.angelscript"
+	}
 }
