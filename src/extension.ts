@@ -5,7 +5,74 @@ import * as vscode from 'vscode'
 
 const NAME = 'openplanetarium'
 
-let g_log = vscode.window.createOutputChannel('Openplanetarium', 'log')
+let g_core: OpenplanetCore | undefined = undefined
+let g_log:  vscode.OutputChannel       = vscode.window.createOutputChannel('Openplanetarium', 'log')
+
+interface OpenplanetCore {
+    op:        string
+    functions: OpenplanetCoreFunction[]
+    classes:   OpenplanetCoreClass[]
+    enums:     OpenplanetCoreEnum[]
+    funcdefs:  OpenplanetCoreFunction[]
+    props:     OpenplanetCoreProp[]
+}
+
+interface OpenplanetCoreClass {
+    ns:        string
+    id:        number
+    name:      string
+    behaviors: OpenplanetCoreClassBehavior[]
+    methods:   OpenplanetCoreFunction[]
+    props:     OpenplanetCoreProp[]
+}
+
+interface OpenplanetCoreClassBehavior {
+    type: number
+    func: OpenplanetCoreFunction
+}
+
+interface OpenplanetCoreProp {
+    typedecl:  string
+    typeflags: number
+    ns:        string
+    name:      string
+    group:     string
+    desc:      string
+    flags:     string[]
+}
+
+interface OpenplanetCoreEnum {
+    ns:     string
+    id:     number
+    name:   string
+    group:  string
+    desc:   string
+    flags:  string[]
+    values: object
+}
+
+interface OpenplanetCoreFunction {
+    id:              number
+    ns:              string
+    name:            string
+    returntypedecl:  string
+    returntypeflags: number
+    args:            OpenplanetCoreFunctionArg[]
+    decl:            string
+    group:           string
+    desc:            string
+    flags:           string[]
+}
+
+interface OpenplanetCoreFunctionArg {
+    typeid:    number
+    typename:  string
+    typedecl:  string
+    typeflags: number
+    name:      string
+    default:   string
+    desc:      string
+}
 
 export function activate(context: vscode.ExtensionContext) {
     log('Openplanetarium is active :)')
@@ -17,7 +84,7 @@ export function activate(context: vscode.ExtensionContext) {
         const msg = 'Hello World from Openplanetarium!'
         log(msg)
         vscode.window.showInformationMessage(msg)
-    }));
+    }))
 
     context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
         if (!e.affectsConfiguration(NAME)) {
@@ -45,6 +112,14 @@ export function activate(context: vscode.ExtensionContext) {
             }
         }
     }))
+
+    g_core = readCoreFile()
+    // log(JSON.stringify(g_core))
+    if (g_core) {
+        log(g_core.op)
+        // log(g_core.functions[0].name)
+        // g_log.appendLine(JSON.stringify(g_core.props, undefined, '\t'))
+    }
 }
 
 function getConfig(): vscode.WorkspaceConfiguration {
@@ -65,6 +140,26 @@ function now(): string {
     } ${
         zPad(d.getHours())}:${zPad(d.getMinutes())}:${zPad(d.getSeconds())}.${zPad(d.getMilliseconds(), 3)
     }`
+}
+
+function readCoreFile(): OpenplanetCore | undefined {
+    const cfg = getConfig()
+    if (cfg.OpenplanetNextFolder.length == 0) {
+        return
+    }
+
+    const fpath = path.join(cfg.OpenplanetNextFolder, 'OpenplanetCore.json')
+    if (!fs.existsSync(fpath)) {
+        log(`file not found: ${fpath}`)
+        return
+    }
+
+    try {
+        return JSON.parse(fs.readFileSync(fpath, 'utf-8')) ?? undefined
+    } catch (e) {
+        log(`error reading file: ${e}`, 'error')
+        return
+    }
 }
 
 function zPad(i: number, count: number = 2): string {
