@@ -1,4 +1,12 @@
+# Extensions
+*.vsix
+
+# Files
+
+# Folders
 node_modules/
 out/
-*.vsix
+test/
+
+# Various
 .env
