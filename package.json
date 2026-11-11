@@ -2,82 +2,19 @@
 	"name": "openplanetarium",
 	"displayName": "Openplanetarium",
 	"description": "Language server for Openplanet's Angelscript",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"publisher": "Ezio416",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ezio416/openplanetarium"
+	},
 	"engines": {
 		"vscode": "^1.126.0"
 	},
-	"activationEvents": [],
-	"main": "./out/extension.js",
 	"categories": [
 		"Programming Languages"
 	],
-	"devDependencies": {
-		"@types/node": "^24.x",
-		"@types/vscode": "^1.126.0",
-		"typescript": "^6.0.3"
-	},
-	"scripts": {
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./",
-		"pretest": "npm run compile",
-		"test": "vscode-test"
-	},
 	"contributes": {
-		"commands": [
-			{
-				"command": "openplanetarium.helloWorld",
-				"title": "Hello World"
-			}
-		],
-		"configuration": [
-			{
-				"title": "Openplanetarium",
-				"properties": {
-					"openplanetarium.OpenplanetNextFolder": {
-						"type": "string",
-						"default": "%USERPROFILE%/OpenplanetNext/",
-						"markdownDescription": "Path to OpenplanetNext folder.\n\nTypically: `%USERPROFILE%/OpenplanetNext/`"
-					},
-					"openplanetarium.Openplanet4Folder": {
-						"type": "string",
-						"default": "%USERPROFILE%/Openplanet4/",
-						"markdownDescription": "Path to Openplanet4 folder.\n\nTypically: `%USERPROFILE%/Openplanet4/`"
-					},
-					"openplanetarium.OpenplanetTurboFolder": {
-						"type": "string",
-						"default": "%USERPROFILE%/OpenplanetTurbo/",
-						"markdownDescription": "Path to OpenplanetTurbo folder.\n\nTypically: `%USERPROFILE%/OpenplanetTurbo/`"
-					},
-					"openplanetarium.OpenplanetUnitedFolder": {
-						"type": "string",
-						"default": "%USERPROFILE%/OpenplanetUnited/",
-						"markdownDescription": "Path to OpenplanetUnited folder.\n\nTypically: `%USERPROFILE%/OpenplanetUnited/`"
-					},
-					"openplanetarium.TrackmaniaNextInstallFolder": {
-						"type": "string",
-						"default": "",
-						"markdownDescription": "Path to Trackmania (2020) install folder.\n\nTypically:\n\n-`C:/Program Files (x86)/Ubisoft/Ubisoft Game Launcher/games/Trackmania/`\n\n-`C:/Program Files (x86)/Steam/steamapps/common/Trackmania/`\n\n-`C:/Program Files/Epic Games/Trackmania/`"
-					},
-					"openplanetarium.Trackmania4InstallFolder": {
-						"type": "string",
-						"default": "",
-						"markdownDescription": "Path to Maniaplanet install folder.\n\nTypically:\n\n-`C:/Program Files (x86)/Steam/steamapps/common/ManiaPlanet_TMCanyon`\n\n-`C:/Program Files (x86)/Steam/steamapps/common/ManiaPlanet_TMStadium`\n\n-`C:/Program Files (x86)/Steam/steamapps/common/ManiaPlanet_TMValley`\n\n-`C:/Program Files (x86)/Steam/steamapps/common/ManiaPlanet_TMLagoon`\n\n-`C:/Program Files (x86)/Steam/steamapps/common/ManiaPlanet_SMStorm`"
-					},
-					"openplanetarium.TrackmaniaTurboInstallFolder": {
-						"type": "string",
-						"default": "",
-						"markdownDescription": "Path to Trackmania (2020) install folder.\n\nTypically:\n\n-`C:/Program Files (x86)/Ubisoft/Ubisoft Game Launcher/games/Trackmania Turbo/`\n\n-`C:/Program Files (x86)/Steam/steamapps/common/Trackmania Turbo/`\n\n-`C:/Program Files/Epic Games/Trackmania Turbo/`"
-					},
-					"openplanetarium.TrackmaniaUnitedInstallFolder": {
-						"type": "string",
-						"default": "",
-						"markdownDescription": "Path to Trackmania Forever install folder.\n\nTypically:\n\n-`C:/Program Files (x86)/Steam/steamapps/common/TrackMania Nations Forever/`\n\n-`C:/Program Files (x86)/Steam/steamapps/common/TrackMania United/`"
-					}
-				}
-			}
-		],
 		"languages": [
 			{
 				"id": "angelscript",
