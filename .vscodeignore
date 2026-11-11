@@ -1,4 +1,15 @@
-.vscode/**
-.vscode-test/**
+# Extensions
+
+# Files
 .gitignore
-vsc-extension-quickstart.md
+syntaxes/*.py
+syntaxes/*.yaml
+tsconfig.json
+
+# Folders
+.git/
+.vscode/
+src/
+test/
+
+# Various
