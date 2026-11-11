@@ -134,7 +134,7 @@ export function activate(context: vscode.ExtensionContext) {
     }))
 
     const end = performance.now()
-    log(`ready (${(end - start).toPrecision(2)} ms)`)
+    log(`ready (${(end - start).toFixed(1)} ms)`)
 }
 
 function getConfig(): vscode.WorkspaceConfiguration {
@@ -180,7 +180,7 @@ function readCoreFile(game: string): OpenplanetCore | undefined {
         return
     } finally {
         const end = performance.now()
-        log(`read core file (${game}) (${(end - start).toPrecision(2)} ms)`)
+        log(`read core file (${game}) (${(end - start).toFixed(1)} ms)`)
     }
 }
 
@@ -207,7 +207,7 @@ function readGameFile(game: string): OpenplanetGame | undefined {
         return
     } finally {
         const end = performance.now()
-        log(`read game file (${game}) (${(end - start).toPrecision(2)} ms)`)
+        log(`read game file (${game}) (${(end - start).toFixed(1)} ms)`)
     }
 }
 
