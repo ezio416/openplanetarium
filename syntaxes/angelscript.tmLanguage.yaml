@@ -124,27 +124,27 @@ repository:
     match: \b(auto|bool|double|float|int|int8|int16|int32|int64|uint|uint8|uint16|uint32|uint64|void)\b
   identifier:
     patterns:
-      - match: \b([A-Za-z_][A-Za-z0-9_]*)\b\s*\(
+      - match: \b([A-Za-z_]\w*)\b\s*\(
         captures:
           1:
             name: entity.name.function.angelscript
-      - match: \b([A-Za-z_][A-Za-z0-9_]*)\b\s*(::)
+      - match: \b([A-Za-z_]\w*)\b\s*(::)
         captures:
           1:
             name: entity.name.namespace.angelscript
           2:
             name: keyword.operator.access.scope.angelscript
-      - match: \b([A-Za-z_][A-Za-z0-9_]*)\b\s*(\.)
+      - match: \b([A-Za-z_]\w*)\b\s*(\.)
         captures:
           1:
             name: variable.class.angelscript
           2:
             name: keyword.operator.access.member.angelscript
-      - match: \b([A-Za-z_][A-Za-z0-9_]*)\b\s*(@)
+      - match: \b([A-Za-z_]\w*)\b\s*(@)
         captures:
           1:
             name: entity.name.type.angelscript
           2:
             name: keyword.operator.handle.angelscript
       - name: entity.name.angelscript
-        match: \b[A-Za-z_][A-Za-z0-9_]*\b
+        match: \b[A-Za-z_]\w*\b
