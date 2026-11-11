@@ -5,8 +5,9 @@ import * as vscode from 'vscode'
 
 const NAME = 'openplanetarium'
 
-let g_core: OpenplanetCore | undefined = undefined
-let g_log:  vscode.OutputChannel       = vscode.window.createOutputChannel('Openplanetarium', 'log')
+let g_coreNext: OpenplanetCore | undefined = undefined
+let g_gameNext: OpenplanetGame | undefined = undefined
+let g_log:      vscode.OutputChannel       = vscode.window.createOutputChannel('Openplanetarium', 'log')
 
 interface OpenplanetCore {
     op:        string
@@ -18,7 +19,7 @@ interface OpenplanetCore {
 }
 
 interface OpenplanetCoreClass {
-    ns:        string
+    ns?:       string
     id:        number
     name:      string
     behaviors: OpenplanetCoreClassBehavior[]
@@ -74,12 +75,20 @@ interface OpenplanetCoreFunctionArg {
     desc:      string
 }
 
-export function activate(context: vscode.ExtensionContext) {
-    log('Openplanetarium is active :)')
+interface OpenplanetGame {
+    op: string
+    mp: string
+    ns: object
+}
 
-    // The command has been defined in the package.json file
-    // Now provide the implementation of the command with registerCommand
-    // The commandId parameter must match the command field in package.json
+export function activate(context: vscode.ExtensionContext) {
+    const start = performance.now()
+    log('starting...')
+
+    g_coreNext = readCoreFile('Next')
+    g_gameNext = readGameFile('Next')
+    ;
+
     context.subscriptions.push(vscode.commands.registerCommand(`${NAME}.helloWorld`, () => {
         const msg = 'Hello World from Openplanetarium!'
         log(msg)
@@ -96,30 +105,36 @@ export function activate(context: vscode.ExtensionContext) {
 
         if (e.affectsConfiguration(`${NAME}.OpenplanetNextFolder`)) {
             // log(`${NAME}.OpenplanetNextFolder changed`)
-            if (cfg.OpenplanetNextFolder.length > 0 && !fs.existsSync(cfg.OpenplanetNextFolder)) {
-                const msg = `folder not found: ${cfg.OpenplanetNextFolder}`
-                log(msg, 'warning')
-                vscode.window.showWarningMessage(msg)
+            if (cfg.OpenplanetNextFolder.length > 0) {
+                if (fs.existsSync(cfg.OpenplanetNextFolder)) {
+                    g_coreNext = readCoreFile('Next')
+                    g_gameNext = readGameFile('Next')
+                } else {
+                    g_coreNext = undefined
+                    g_gameNext = undefined
+                    const msg = `folder not found: ${cfg.OpenplanetNextFolder}`
+                    log(msg, 'warning')
+                    vscode.window.showWarningMessage(msg)
+                }
             }
         }
 
         if (e.affectsConfiguration(`${NAME}.TrackmaniaNextInstallFolder`)) {
             // log(`${NAME}.TrackmaniaNextInstallFolder changed`)
-            if (cfg.TrackmaniaNextInstallFolder.length > 0 && !fs.existsSync(cfg.TrackmaniaNextInstallFolder)) {
-                const msg = `folder not found: ${cfg.TrackmaniaNextInstallFolder}`
-                log(msg, 'warning')
-                vscode.window.showWarningMessage(msg)
+            if (cfg.TrackmaniaNextInstallFolder.length > 0) {
+                if (fs.existsSync(cfg.TrackmaniaNextInstallFolder)) {
+                    ;
+                } else {
+                    const msg = `folder not found: ${cfg.TrackmaniaNextInstallFolder}`
+                    log(msg, 'warning')
+                    vscode.window.showWarningMessage(msg)
+                }
             }
         }
     }))
 
-    g_core = readCoreFile()
-    // log(JSON.stringify(g_core))
-    if (g_core) {
-        log(g_core.op)
-        // log(g_core.functions[0].name)
-        // g_log.appendLine(JSON.stringify(g_core.props, undefined, '\t'))
-    }
+    const end = performance.now()
+    log(`ready (${(end - start).toPrecision(2)} ms)`)
 }
 
 function getConfig(): vscode.WorkspaceConfiguration {
@@ -142,13 +157,17 @@ function now(): string {
     }`
 }
 
-function readCoreFile(): OpenplanetCore | undefined {
+function readCoreFile(game: string): OpenplanetCore | undefined {
+    const start = performance.now()
+
     const cfg = getConfig()
-    if (cfg.OpenplanetNextFolder.length == 0) {
+    const settingName = `Openplanet${game}Folder`
+    const folder: string = cfg[settingName]
+    if (!folder) {
         return
     }
 
-    const fpath = path.join(cfg.OpenplanetNextFolder, 'OpenplanetCore.json')
+    const fpath = path.join(folder, 'OpenplanetCore.json')
     if (!fs.existsSync(fpath)) {
         log(`file not found: ${fpath}`)
         return
@@ -159,6 +178,36 @@ function readCoreFile(): OpenplanetCore | undefined {
     } catch (e) {
         log(`error reading file: ${e}`, 'error')
         return
+    } finally {
+        const end = performance.now()
+        log(`read core file (${game}) (${(end - start).toPrecision(2)} ms)`)
+    }
+}
+
+function readGameFile(game: string): OpenplanetGame | undefined {
+    const start = performance.now()
+
+    const cfg = getConfig()
+    const settingName = `Openplanet${game}Folder`
+    const folder: string = cfg[settingName]
+    if (!folder) {
+        return
+    }
+
+    const fpath = path.join(folder, `Openplanet${game}.json`)
+    if (!fs.existsSync(fpath)) {
+        log(`file not found: ${fpath}`)
+        return
+    }
+
+    try {
+        return JSON.parse(fs.readFileSync(fpath, 'utf-8')) ?? undefined
+    } catch (e) {
+        log(`error reading file: ${e}`, 'error')
+        return
+    } finally {
+        const end = performance.now()
+        log(`read game file (${game}) (${(end - start).toPrecision(2)} ms)`)
     }
 }
 
