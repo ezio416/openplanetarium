@@ -11,7 +11,6 @@
 	"engines": {
 		"vscode": "^1.126.0"
 	},
-	"activationEvents": [],
 	"main": "./out/extension.js",
 	"categories": [
 		"Programming Languages"
