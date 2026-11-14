@@ -21,11 +21,7 @@
 		"typescript": "^6.0.3"
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./",
-		"pretest": "npm run compile",
-		"test": "vscode-test"
+		"compile": "tsc -b"
 	},
 	"contributes": {
 		"commands": [
