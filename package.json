@@ -11,7 +11,7 @@
 	"engines": {
 		"vscode": "^1.126.0"
 	},
-	"main": "./out/extension.js",
+	"main": "./client/out/client.js",
 	"categories": [
 		"Programming Languages"
 	],
@@ -21,7 +21,8 @@
 		"typescript": "^6.0.3"
 	},
 	"scripts": {
-		"compile": "tsc -b"
+		"compile": "tsc -b -f",
+		"postinstall": "cd client && npm i && cd .."
 	},
 	"contributes": {
 		"commands": [

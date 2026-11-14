@@ -1,0 +1,13 @@
+{
+	"name": "openplanetarium-client",
+	"publisher": "Ezio416",
+	"engines": {
+		"vscode": "^1.126.0"
+	},
+	"dependencies": {
+		"vscode-languageclient": "^8.1.0"
+	},
+	"devDependencies": {
+		"@types/vscode": "^1.126.0"
+	}
+}
