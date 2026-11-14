@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"module": "node16",
+		"target": "es2020",
+		"outDir": "out",
+		"rootDir": "src",
+		"sourceMap": true,
+		"composite": true,
+		"types": [
+			"node"
+		]
+	},
+	"include": [
+		"src"
+	],
+	"exclude": [
+		"node_modules"
+	]
+}

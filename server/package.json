@@ -1,0 +1,10 @@
+{
+	"name": "openplanetarium-server",
+	"author": "Ezio416",
+	"engines": {
+		"node": "*"
+	},
+	"dependencies": {
+		"vscode-languageserver": "^8.1.0"
+	}
+}
