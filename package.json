@@ -18,11 +18,12 @@
 	],
 	"devDependencies": {
 		"@types/node": "^20.5.7",
+		"js-yaml": "^5.5.0",
 		"typescript": "^6.0.3"
 	},
 	"scripts": {
-		"compile": "tsc -b -f",
-		"compile-grammar": "node grammar/src/compile-grammar.js",
+		"compile": "tsc -b",
+		"compile-grammar": "mkdir grammar/out & sleep 0.1 && js-yaml grammar/angelscript.tmLanguage.yaml > grammar/out/angelscript.tmLanguage.json",
 		"postinstall": "cd client && npm i && cd ../server && npm i && cd ../grammar && npm i && cd .."
 	},
 	"contributes": {

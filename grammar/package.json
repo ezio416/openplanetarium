@@ -1,8 +1,0 @@
-{
-	"name": "openplanetarium-grammar",
-	"author": "Ezio416",
-	"dependencies": {
-		"js-yaml": "^5.5.0"
-	},
-	"type": "module"
-}
