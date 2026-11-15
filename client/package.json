@@ -1,5 +1,6 @@
 {
 	"name": "openplanetarium-client",
+	"author": "Ezio416",
 	"publisher": "Ezio416",
 	"engines": {
 		"vscode": "^1.126.0"

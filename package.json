@@ -3,6 +3,7 @@
 	"displayName": "Openplanetarium",
 	"description": "Language server for Openplanet's Angelscript",
 	"version": "0.1.0",
+	"author": "Ezio416",
 	"publisher": "Ezio416",
 	"repository": {
 		"type": "git",
