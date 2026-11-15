@@ -26,7 +26,8 @@
 		"compile-grammar": "mkdir -p grammar/out && sleep 0.1 && nearleyc grammar/angelscript.ne -o grammar/out/angelscript.js",
 		"compile-ts": "tsc -b -f",
 		"convert-yaml-grammar": "mkdir -p grammar/out && sleep 0.1 && js-yaml grammar/angelscript.tmLanguage.yaml > grammar/out/angelscript.tmLanguage.json",
-		"postinstall": "cd client && npm i && cd ../server && npm i && cd .."
+		"postinstall": "cd client && npm i && cd ../server && npm i && cd ..",
+		"test-grammar": "nearley-test grammar/out/angelscript.js < grammar/test.as"
 	},
 	"contributes": {
 		"commands": [
