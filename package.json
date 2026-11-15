@@ -24,7 +24,7 @@
 	"scripts": {
 		"compile": "tsc -b",
 		"compile-grammar": "mkdir grammar/out & sleep 0.1 && js-yaml grammar/angelscript.tmLanguage.yaml > grammar/out/angelscript.tmLanguage.json",
-		"postinstall": "cd client && npm i && cd ../server && npm i && cd ../grammar && npm i && cd .."
+		"postinstall": "cd client && npm i && cd ../server && npm i && cd .."
 	},
 	"contributes": {
 		"commands": [
