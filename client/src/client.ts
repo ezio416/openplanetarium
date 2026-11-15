@@ -1,93 +1,45 @@
-import * as fs from 'fs'
 import * as path from 'path'
-
 import * as vscode from 'vscode'
+import {
+  LanguageClient,
+  LanguageClientOptions,
+  ServerOptions,
+  TransportKind,
+} from 'vscode-languageclient/node'
 
 const NAME = 'openplanetarium'
 
-let g_coreNext: OpenplanetCore | undefined = undefined
-let g_gameNext: OpenplanetGame | undefined = undefined
-let g_log:      vscode.OutputChannel       = vscode.window.createOutputChannel('Openplanetarium', 'log')
-
-interface OpenplanetCore {
-    op:        string
-    functions: OpenplanetCoreFunction[]
-    classes:   OpenplanetCoreClass[]
-    enums:     OpenplanetCoreEnum[]
-    funcdefs:  OpenplanetCoreFunction[]
-    props:     OpenplanetCoreProp[]
-}
-
-interface OpenplanetCoreClass {
-    ns?:       string
-    id:        number
-    name:      string
-    behaviors: OpenplanetCoreClassBehavior[]
-    methods:   OpenplanetCoreFunction[]
-    props:     OpenplanetCoreProp[]
-}
-
-interface OpenplanetCoreClassBehavior {
-    type: number
-    func: OpenplanetCoreFunction
-}
-
-interface OpenplanetCoreProp {
-    typedecl:  string
-    typeflags: number
-    ns:        string
-    name:      string
-    group:     string
-    desc:      string
-    flags:     string[]
-}
-
-interface OpenplanetCoreEnum {
-    ns:     string
-    id:     number
-    name:   string
-    group:  string
-    desc:   string
-    flags:  string[]
-    values: object
-}
-
-interface OpenplanetCoreFunction {
-    id:              number
-    ns:              string
-    name:            string
-    returntypedecl:  string
-    returntypeflags: number
-    args:            OpenplanetCoreFunctionArg[]
-    decl:            string
-    group:           string
-    desc:            string
-    flags:           string[]
-}
-
-interface OpenplanetCoreFunctionArg {
-    typeid:    number
-    typename:  string
-    typedecl:  string
-    typeflags: number
-    name:      string
-    default:   string
-    desc:      string
-}
-
-interface OpenplanetGame {
-    op: string
-    mp: string
-    ns: object
-}
+let g_client: LanguageClient
+let g_log:    vscode.OutputChannel = vscode.window.createOutputChannel('Openplanetarium', 'log')
 
 export function activate(context: vscode.ExtensionContext) {
     const start = performance.now()
     log('starting...')
 
-    g_coreNext = readCoreFile('Next')
-    g_gameNext = readGameFile('Next')
-    ;
+    const serverModule = context.asAbsolutePath(
+        path.join("server", "out", "server.js")
+    )
+
+    const serverOptions: ServerOptions = {
+        run:   { module: serverModule, transport: TransportKind.ipc },
+        debug: { module: serverModule, transport: TransportKind.ipc },
+    }
+
+    const clientOptions: LanguageClientOptions = {
+        documentSelector: [{ scheme: "file", language: "angelscript" }],
+        synchronize: {
+            fileEvents: vscode.workspace.createFileSystemWatcher("**/.clientrc"),
+        },
+    }
+
+    g_client = new LanguageClient(
+        NAME,
+        "Openplanetarium",
+        serverOptions,
+        clientOptions
+    );
+
+    g_client.start();
 
     context.subscriptions.push(vscode.commands.registerCommand(`${NAME}.helloWorld`, () => {
         const msg = 'Hello World from Openplanetarium!'
@@ -95,50 +47,12 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage(msg)
     }))
 
-    context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
-        if (!e.affectsConfiguration(NAME)) {
-            return
-        }
-
-        const cfg = getConfig()
-        // log(JSON.stringify(cfg, undefined, '\t'))
-
-        if (e.affectsConfiguration(`${NAME}.OpenplanetNextFolder`)) {
-            // log(`${NAME}.OpenplanetNextFolder changed`)
-            if (cfg.OpenplanetNextFolder.length > 0) {
-                if (fs.existsSync(cfg.OpenplanetNextFolder)) {
-                    g_coreNext = readCoreFile('Next')
-                    g_gameNext = readGameFile('Next')
-                } else {
-                    g_coreNext = undefined
-                    g_gameNext = undefined
-                    const msg = `folder not found: ${cfg.OpenplanetNextFolder}`
-                    log(msg, 'warning')
-                    vscode.window.showWarningMessage(msg)
-                }
-            }
-        }
-
-        if (e.affectsConfiguration(`${NAME}.TrackmaniaNextInstallFolder`)) {
-            // log(`${NAME}.TrackmaniaNextInstallFolder changed`)
-            if (cfg.TrackmaniaNextInstallFolder.length > 0) {
-                if (fs.existsSync(cfg.TrackmaniaNextInstallFolder)) {
-                    ;
-                } else {
-                    const msg = `folder not found: ${cfg.TrackmaniaNextInstallFolder}`
-                    log(msg, 'warning')
-                    vscode.window.showWarningMessage(msg)
-                }
-            }
-        }
-    }))
-
     const end = performance.now()
     log(`ready (${(end - start).toFixed(1)} ms)`)
 }
 
-function getConfig(): vscode.WorkspaceConfiguration {
-    return vscode.workspace.getConfiguration(NAME)
+export function deactivate(): Thenable<void> | undefined {
+    return g_client ? g_client.stop() : undefined
 }
 
 function log(msg: string, type: string = 'info') {
@@ -155,60 +69,6 @@ function now(): string {
     } ${
         zPad(d.getHours())}:${zPad(d.getMinutes())}:${zPad(d.getSeconds())}.${zPad(d.getMilliseconds(), 3)
     }`
-}
-
-function readCoreFile(game: string): OpenplanetCore | undefined {
-    const start = performance.now()
-
-    const cfg = getConfig()
-    const settingName = `Openplanet${game}Folder`
-    const folder: string = cfg[settingName]
-    if (!folder) {
-        return
-    }
-
-    const fpath = path.join(folder, 'OpenplanetCore.json')
-    if (!fs.existsSync(fpath)) {
-        log(`file not found: ${fpath}`)
-        return
-    }
-
-    try {
-        return JSON.parse(fs.readFileSync(fpath, 'utf-8')) ?? undefined
-    } catch (e) {
-        log(`error reading file: ${e}`, 'error')
-        return
-    } finally {
-        const end = performance.now()
-        log(`read core file (${game}) (${(end - start).toFixed(1)} ms)`)
-    }
-}
-
-function readGameFile(game: string): OpenplanetGame | undefined {
-    const start = performance.now()
-
-    const cfg = getConfig()
-    const settingName = `Openplanet${game}Folder`
-    const folder: string = cfg[settingName]
-    if (!folder) {
-        return
-    }
-
-    const fpath = path.join(folder, `Openplanet${game}.json`)
-    if (!fs.existsSync(fpath)) {
-        log(`file not found: ${fpath}`)
-        return
-    }
-
-    try {
-        return JSON.parse(fs.readFileSync(fpath, 'utf-8')) ?? undefined
-    } catch (e) {
-        log(`error reading file: ${e}`, 'error')
-        return
-    } finally {
-        const end = performance.now()
-        log(`read game file (${game}) (${(end - start).toFixed(1)} ms)`)
-    }
 }
 
 function zPad(i: number, count: number = 2): string {
