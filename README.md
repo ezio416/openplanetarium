@@ -21,3 +21,5 @@ code .
 ```
 
 Build and launch extension in a new window with `F5`
+
+*Note: extension, server, and development process not tested on Windows/MacOS*
