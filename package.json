@@ -22,7 +22,8 @@
 	},
 	"scripts": {
 		"compile": "tsc -b -f",
-		"postinstall": "cd client && npm i && cd ../server && npm i && cd .."
+		"compile-grammar": "node grammar/src/compile-grammar.js",
+		"postinstall": "cd client && npm i && cd ../server && npm i && cd ../grammar && npm i && cd .."
 	},
 	"contributes": {
 		"commands": [
@@ -95,7 +96,7 @@
 			{
 				"language": "angelscript",
 				"scopeName": "source.angelscript",
-				"path": "./syntaxes/angelscript.tmLanguage.json"
+				"path": "./grammar/out/angelscript.tmLanguage.json"
 			}
 		]
 	}

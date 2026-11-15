@@ -6,7 +6,28 @@
 		{
 			"type": "npm",
 			"script": "compile",
+			"label": "compile",
 			"problemMatcher": "$tsc",
+			"presentation": {
+				"reveal": "never"
+			},
+			"group": "build"
+		},
+		{
+			"type": "npm",
+			"script": "compile-grammar",
+			"label": "compile-grammar",
+			"presentation": {
+				"reveal": "never"
+			},
+			"group": "build"
+		},
+		{
+			"label": "build",
+			"dependsOn": [
+				"compile",
+				"compile-grammar"
+			],
 			"presentation": {
 				"reveal": "never"
 			},
