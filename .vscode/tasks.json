@@ -5,15 +5,6 @@
 	"tasks": [
 		{
 			"type": "npm",
-			"script": "compile-grammar",
-			"label": "compile-grammar",
-			"presentation": {
-				"reveal": "never"
-			},
-			"group": "build"
-		},
-		{
-			"type": "npm",
 			"script": "compile-ts",
 			"label": "compile-ts",
 			"problemMatcher": "$tsc",
@@ -23,10 +14,19 @@
 			"group": "build"
 		},
 		{
+			"type": "npm",
+			"script": "convert-yaml-grammar",
+			"label": "convert-yaml-grammar",
+			"presentation": {
+				"reveal": "never"
+			},
+			"group": "build"
+		},
+		{
 			"label": "build",
 			"dependsOn": [
-				"compile-grammar",
-				"compile-ts"
+				"compile-ts",
+				"convert-yaml-grammar"
 			],
 			"presentation": {
 				"reveal": "never"

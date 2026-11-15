@@ -22,8 +22,8 @@
 		"typescript": "^6.0.3"
 	},
 	"scripts": {
-		"compile-grammar": "mkdir grammar/out & sleep 0.1 && js-yaml grammar/angelscript.tmLanguage.yaml > grammar/out/angelscript.tmLanguage.json",
 		"compile-ts": "tsc -b -f",
+		"convert-yaml-grammar": "mkdir grammar/out & sleep 0.1 && js-yaml grammar/angelscript.tmLanguage.yaml > grammar/out/angelscript.tmLanguage.json",
 		"postinstall": "cd client && npm i && cd ../server && npm i && cd .."
 	},
 	"contributes": {
