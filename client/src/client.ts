@@ -4,7 +4,7 @@ import {
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
-  TransportKind,
+  TransportKind
 } from 'vscode-languageclient/node'
 
 const NAME = 'openplanetarium'
@@ -16,20 +16,29 @@ export function activate(context: vscode.ExtensionContext) {
     const start = performance.now()
     log('starting...')
 
-    const serverModule = context.asAbsolutePath(
-        path.join("server", "out", "server.js")
-    )
+    const serverModule = context.asAbsolutePath(path.join("server", "out", "server.js"))
 
     const serverOptions: ServerOptions = {
-        run:   { module: serverModule, transport: TransportKind.ipc },
-        debug: { module: serverModule, transport: TransportKind.ipc },
+        run: {
+            module: serverModule,
+            transport: TransportKind.ipc
+        },
+        debug: {
+            module: serverModule,
+            transport: TransportKind.ipc
+        }
     }
 
     const clientOptions: LanguageClientOptions = {
-        documentSelector: [{ scheme: "file", language: "angelscript" }],
+        documentSelector: [
+            {
+                scheme: "file",
+                language: "angelscript"
+            }
+        ],
         synchronize: {
             fileEvents: vscode.workspace.createFileSystemWatcher("**/.clientrc"),
-        },
+        }
     }
 
     g_client = new LanguageClient(
@@ -37,9 +46,9 @@ export function activate(context: vscode.ExtensionContext) {
         "Openplanetarium",
         serverOptions,
         clientOptions
-    );
+    )
 
-    g_client.start();
+    g_client.start()
 
     context.subscriptions.push(vscode.commands.registerCommand(`${NAME}.helloWorld`, () => {
         const msg = 'Hello World from Openplanetarium!'
