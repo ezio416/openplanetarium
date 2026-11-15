@@ -89,7 +89,7 @@
 				"extensions": [
 					".as"
 				],
-				"configuration": "./language-configuration.json"
+				"configuration": "./grammar/language-configuration.json"
 			}
 		],
 		"grammars": [
