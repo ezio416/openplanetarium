@@ -5,6 +5,15 @@
 	"tasks": [
 		{
 			"type": "npm",
+			"script": "compile-grammar",
+			"label": "compile-grammar",
+			"presentation": {
+				"reveal": "never"
+			},
+			"group": "build"
+		},
+		{
+			"type": "npm",
 			"script": "compile-ts",
 			"label": "compile-ts",
 			"problemMatcher": "$tsc",
@@ -25,6 +34,7 @@
 		{
 			"label": "build",
 			"dependsOn": [
+				"compile-grammar",
 				"compile-ts",
 				"convert-yaml-grammar"
 			],
