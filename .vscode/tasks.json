@@ -5,8 +5,18 @@
 	"tasks": [
 		{
 			"type": "npm",
+			"script": "build",
+			"presentation": {
+				"reveal": "never"
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"type": "npm",
 			"script": "compile-grammar",
-			"label": "compile-grammar",
 			"presentation": {
 				"reveal": "never"
 			},
@@ -15,7 +25,6 @@
 		{
 			"type": "npm",
 			"script": "compile-ts",
-			"label": "compile-ts",
 			"problemMatcher": "$tsc",
 			"presentation": {
 				"reveal": "never"
@@ -25,7 +34,6 @@
 		{
 			"type": "npm",
 			"script": "convert-yaml-grammar",
-			"label": "convert-yaml-grammar",
 			"presentation": {
 				"reveal": "never"
 			},
@@ -34,26 +42,10 @@
 		{
 			"type": "npm",
 			"script": "test-grammar",
-			"label": "test-grammar",
 			"presentation": {
 				"reveal": "never"
 			},
 			"group": "build"
 		},
-		{
-			"label": "build",
-			"dependsOn": [
-				"compile-grammar",
-				"compile-ts",
-				"convert-yaml-grammar"
-			],
-			"presentation": {
-				"reveal": "never"
-			},
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			}
-		}
 	]
 }
