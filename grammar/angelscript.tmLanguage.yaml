@@ -116,8 +116,11 @@ repository:
     name: punctuation.terminal.angelscript
     match: ;
   type:
-    name: storage.type.primitive.angelscript
-    match: \b(auto|bool|double|float|int|int8|int16|int32|int64|uint|uint8|uint16|uint32|uint64|void)\b
+    patterns:
+      - name: storage.type.primitive.angelscript
+        match: \b(auto|bool|double|float|int|int8|int16|int32|int64|uint|uint8|uint16|uint32|uint64|void)\b
+      - name: storage.type.standard-library.angelscript
+        match: \b(array|dictionary|ref|string)\b
   identifier:
     patterns:
       - match: \b([A-Za-z_]\w*)\b\s*\(
