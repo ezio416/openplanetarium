@@ -35,9 +35,9 @@ repository:
       - name: keyword.control.angelscript
         match: \b(break|case|continue|default|return)\b
       - name: keyword.declaration.angelscript
-        match: \b(class|enum|from|funcdef|import|interface|namespace)\b
+        match: \b(class|enum|from|funcdef|function|get|import|interface|namespace|set|typedef|using)\b
       - name: keyword.modifier.angelscript
-        match: \b(abstract|const|final|mixin|override|private|protected|shared)\b
+        match: \b(abstract|const|delete|explicit|external|final|mixin|override|private|property|protected|shared)\b
       - name: keyword.operator.access.member.angelscript
         match: \.
       - name: keyword.operator.access.scope.angelscript
@@ -67,7 +67,7 @@ repository:
       - name: keyword.operator.inheritance.angelscript
         match: (:)
       - name: keyword.other.angelscript
-        match: \b(function|super|this)\b
+        match: \b(super|this)\b
       - name: keyword.reference.angelscript
         match: '&\s*(in|inout|out)\b'
       - name: keyword.statement.angelscript
