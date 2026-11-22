@@ -68,12 +68,8 @@ repository:
         match: (:)
       - name: keyword.other.angelscript
         match: \b(function|super|this)\b
-      - name: keyword.reference.in.angelscript
-        match: '&\s*in'
-      - name: keyword.reference.inout.angelscript
-        match: '&\s*inout'
-      - name: keyword.reference.out.angelscript
-        match: '&\s*out'
+      - name: keyword.reference.angelscript
+        match: '&\s*(in|inout|out)\b'
       - name: keyword.statement.angelscript
         match: \b(catch|do|else|for|foreach|if|switch|try|while)\b
       - match: \b(cast)\s*<\s*\b([A-Za-z_][A-Za-z0-9_]*)\b\s*@?\s*>
