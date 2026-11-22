@@ -35,8 +35,8 @@ statement -> expression:? _ %sentinel {% d => d[0] %}
 
 expression -> constant {% id %}
 
-constant -> %boolean {% id %}
-constant -> %nullptr {% id %}
+constant -> %boolean {% d => { d[0].value = d[0].text === "true"; return d[0] } %}
+constant -> %nullptr {% d => { d[0].value = null; return d[0] } %}
 constant -> number {% id %}
 
 number -> %number_scientific {% id %}
