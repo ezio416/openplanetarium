@@ -3,7 +3,7 @@
 @{%
 const moo = require("moo")
 const lexer = moo.compile({
-    reference: /&\s*(?:(?:in|inout|out)\b)?/,
+    // reference: /&\s*(?:(?:in|inout|out)\b)?/,
     identifier: {
         match: /[A-Z_a-z][0-9A-Z_a-z]*/,
         type: moo.keywords({
@@ -11,14 +11,61 @@ const lexer = moo.compile({
                 "false",
                 "true"
             ],
-            nullptr: "null"
+            cast: "cast",
+            control: [
+                "break",
+                "case",
+                "continue",
+                "default",
+                "return"
+            ],
+            declaration: [
+                "class",
+                "enum",
+                "from",
+                "funcdef",
+                "function",
+                "get",
+                "import",
+                "interface",
+                "namespace",
+                "set",
+                "typedef",
+                "using"
+            ],
+            modifier: [
+                "abstract",
+                "const",
+                "delete",
+                "explicit",
+                "external",
+                "final",
+                "mixin",
+                "override",
+                "private",
+                "property",
+                "protected",
+                "shared"
+            ],
+            nullptr: "null",
+            statement: [
+                "catch",
+                "do",
+                "else",
+                "for",
+                "foreach",
+                "if",
+                "switch",
+                "try",
+                "while"
+            ]
         })
     },
     number_scientific: {
         match: /(?:[0-9](?:'?[0-9])*|[0-9](?:'?[0-9])*\.(?:[0-9](?:'?[0-9])*)?|[0-9]*\.[0-9](?:'?[0-9])*)[Ee](?:[+-]?[0-9](?:'?[0-9])*)?/,
         value: v => {
             if (v.endsWith("E") || v.endsWith("e")) {
-                v += "0"
+                v += "0"  // AS implicitly adds a 0 exponent, JS doesn't
             }
             return Number(v.replaceAll("'", ""))
         }
@@ -43,6 +90,22 @@ const lexer = moo.compile({
         match: /(?:0[Dd])?[0-9](?:'?[0-9])*/,
         value: v => parseInt(v.replace("0D", "").replace("0d", "").replaceAll("'", ""))
     },
+    lbrace: "{",
+    rbrace: "}",
+    lbracket: "[",
+    rbracket: "]",
+    lparen: "(",
+    rparen: ")",
+    lte: "<=",
+    lt: "<",
+    gte: ">=",
+    gt: ">",
+    scope_access: "::",
+    member_access: ".",
+    question: "?",
+    colon: ":",
+    comma: ",",
+    handle: "@",
     sentinel: /;/,
     whitespace: {
         match: /\s+/,
@@ -56,6 +119,7 @@ const lexer = moo.compile({
 program -> ( _ statement ):+ _ {% d => d[0].map(v => v[1]).filter(s => s !== null) %}
 
 statement -> expression:? _ %sentinel {% d => d[0] %}
+statement -> %lbrace _ statement _ %rbrace {% d => d[2] %}
 
 expression -> constant {% id %}
 expression -> %lparen _ expression _ %rparen {% d => d[2] %}
