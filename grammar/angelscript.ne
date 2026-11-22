@@ -34,6 +34,7 @@ program -> ( _ statement ):+ _ {% d => d[0].map(v => v[1]).filter(s => s !== nul
 statement -> expression:? _ %sentinel {% d => d[0] %}
 
 expression -> constant {% id %}
+expression -> %lparen _ expression _ %rparen {% d => d[2] %}
 
 constant -> %boolean {% d => { d[0].value = d[0].text === "true"; return d[0] } %}
 constant -> %nullptr {% d => { d[0].value = null; return d[0] } %}
