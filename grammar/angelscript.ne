@@ -14,12 +14,35 @@ const lexer = moo.compile({
             nullptr: "null"
         })
     },
-    number_scientific: /(?:[0-9](?:'?[0-9])*|[0-9](?:'?[0-9])*\.(?:[0-9](?:'?[0-9])*)?|[0-9]*\.[0-9](?:'?[0-9])*)[Ee](?:[\+-]?[0-9](?:'?[0-9])*)?/,
-    number_float: /(?:[0-9](?:'?[0-9])*\.(?:[0-9](?:'?[0-9])*)?|[0-9]*\.[0-9](?:'?[0-9])*)f?/,
-    number_hexadecimal: /0[Xx][0-9A-Fa-f](?:'?[0-9A-Fa-f])*/,
-    number_octal: /0[Oo][0-7](?:'?[0-7])*/,
-    number_binary: /0[Bb][01](?:'?[01])*/,
-    number_integer: /(?:0[Dd])?[0-9](?:'?[0-9])*/,
+    number_scientific: {
+        match: /(?:[0-9](?:'?[0-9])*|[0-9](?:'?[0-9])*\.(?:[0-9](?:'?[0-9])*)?|[0-9]*\.[0-9](?:'?[0-9])*)[Ee](?:[+-]?[0-9](?:'?[0-9])*)?/,
+        value: v => {
+            if (v.endsWith("E") || v.endsWith("e")) {
+                v += "0"
+            }
+            return Number(v.replaceAll("'", ""))
+        }
+    },
+    number_float: {
+        match: /(?:[0-9](?:'?[0-9])*\.(?:[0-9](?:'?[0-9])*)?|[0-9]*\.[0-9](?:'?[0-9])*)f?/,
+        value: v => parseFloat(v.replaceAll("'", ""))
+    },
+    number_hexadecimal: {
+        match: /0[Xx][0-9A-Fa-f](?:'?[0-9A-Fa-f])*/,
+        value: v => parseInt(v.replaceAll("'", ""), 16)
+    },
+    number_octal: {
+        match: /0[Oo][0-7](?:'?[0-7])*/,
+        value: v => parseInt(v.replace("O", "").replace("o", "").replaceAll("'", ""), 8)
+    },
+    number_binary: {
+        match: /0[Bb][01](?:'?[01])*/,
+        value: v => parseInt(v.replace("0B", "").replace("0b", "").replaceAll("'", ""), 2)
+    },
+    number_integer: {
+        match: /(?:0[Dd])?[0-9](?:'?[0-9])*/,
+        value: v => parseInt(v.replace("0D", "").replace("0d", "").replaceAll("'", ""))
+    },
     sentinel: /;/,
     whitespace: {
         match: /\s+/,
