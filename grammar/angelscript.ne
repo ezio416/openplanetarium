@@ -3,6 +3,7 @@
 @{%
 const moo = require("moo")
 const lexer = moo.compile({
+    reference: /&\s*(?:(?:in|inout|out)\b)?/,
     identifier: {
         match: /[A-Z_a-z][0-9A-Z_a-z]*/,
         type: moo.keywords({
