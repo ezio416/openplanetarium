@@ -16,6 +16,14 @@
 		},
 		{
 			"type": "npm",
+			"script": "compile-and-test-grammar",
+			"presentation": {
+				"reveal": "never"
+			},
+			"group": "build"
+		},
+		{
+			"type": "npm",
 			"script": "compile-grammar",
 			"presentation": {
 				"reveal": "never"

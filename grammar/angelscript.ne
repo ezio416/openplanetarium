@@ -1,23 +1,49 @@
-program     -> _ literal (__ literal):* _
+# angelscript grammar reference: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_bnf.html
 
-literal     -> boolean | nullptr | number
+@{%
+const moo = require("moo")
+const lexer = moo.compile({
+    identifier: {
+        match: /[A-Z_a-z][0-9A-Z_a-z]*/,
+        type: moo.keywords({
+            boolean: [
+                "false",
+                "true"
+            ],
+            nullptr: "null"
+        })
+    },
+    number_scientific: /(?:[0-9](?:'?[0-9])*|[0-9](?:'?[0-9])*\.(?:[0-9](?:'?[0-9])*)?|[0-9]*\.[0-9](?:'?[0-9])*)[Ee](?:[\+-]?[0-9](?:'?[0-9])*)?/,
+    number_float: /(?:[0-9](?:'?[0-9])*\.(?:[0-9](?:'?[0-9])*)?|[0-9]*\.[0-9](?:'?[0-9])*)f?/,
+    number_hexadecimal: /0[Xx][0-9A-Fa-f](?:'?[0-9A-Fa-f])*/,
+    number_octal: /0[Oo][0-7](?:'?[0-7])*/,
+    number_binary: /0[Bb][01](?:'?[01])*/,
+    number_integer: /(?:0[Dd])?[0-9](?:'?[0-9])*/,
+    sentinel: /;/,
+    whitespace: {
+        match: /\s+/,
+        lineBreaks: true
+    }
+})
+%}
 
-boolean     -> "true" | "false"
+@lexer lexer
 
-nullptr     -> "null"
+program -> ( _ statement ):+ _ {% d => d[0].map(v => v[1]).filter(s => s !== null) %}
 
-number      -> number_flt | number_hex | number_int | number_oct | number_bin
-number_flt  -> ( number_int "." number_uint:? | number_int:? "." number_uint ) "f":?
-number_hex  -> "0x" digit_hex:+
-digit_hex   -> [0-9A-Fa-f]
-number_int  -> "-":? number_uint
-number_uint -> digit_int:+
-digit_int   -> [0-9]
-number_oct  -> "0o" digit_oct:+
-digit_oct   -> [0-7]
-number_bin  -> "0b" digit_bin:+
-digit_bin   -> [01]
+statement -> expression:? _ %sentinel {% d => d[0] %}
 
-_           -> WS:*
-__          -> WS:+
-WS          -> " " | "\n" | "\r" | "\t"
+expression -> constant {% id %}
+
+constant -> %boolean {% id %}
+constant -> %nullptr {% id %}
+constant -> number {% id %}
+
+number -> %number_scientific {% id %}
+number -> %number_float {% id %}
+number -> %number_hexadecimal {% id %}
+number -> %number_octal {% id %}
+number -> %number_binary {% id %}
+number -> %number_integer {% id %}
+
+_ -> %whitespace:*

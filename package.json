@@ -19,12 +19,14 @@
 	"devDependencies": {
 		"@types/node": "^20.5.7",
 		"js-yaml": "^5.5.0",
+		"moo": "^0.5.3",
 		"nearley": "^2.20.1",
 		"typescript": "^6.0.3"
 	},
 	"scripts": {
 		"build": "npm i && npm run convert-yaml-grammar && npm run compile-ts",
 		"compile-grammar": "mkdir -p grammar/out && sleep 0.1 && nearleyc grammar/angelscript.ne -o grammar/out/angelscript.js",
+		"compile-and-test-grammar": "npm run compile-grammar && npm run test-grammar",
 		"compile-ts": "tsc -b -f",
 		"convert-yaml-grammar": "mkdir -p grammar/out && sleep 0.1 && js-yaml grammar/angelscript.tmLanguage.yaml > grammar/out/angelscript.tmLanguage.json",
 		"postinstall": "cd client && npm i && cd ../server && npm i && cd ..",
