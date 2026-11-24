@@ -3,80 +3,79 @@
 @{%
 const moo = require("moo")
 const lexer = moo.compile({
-    // reference: /&\s*(?:(?:in|inout|out)\b)?/,
+    string: {  // TODO just copied from an example
+        match: /"(?:[^\n\\"]|\\["\\ntbfr])*"/,
+        value: v => JSON.parse(v)
+    },
     identifier: {
         match: /[A-Z_a-z][0-9A-Z_a-z]*/,
         type: moo.keywords({
-            bool_false:      "false",
-            bool_true:       "true",
-            cast:            "cast",
-            cmp_is:          "is",
-            cls_super:       "super",
-            cls_this:        "this",
-            ctl_break:       "break",
-            ctl_case:        "case",
-            ctl_continue:    "continue",
-            ctl_default:     "default",
-            ctl_return:      "return",
-            decl_class:      "class",
-            decl_enum:       "enum",
-            decl_from:       "from",
-            decl_funcdef:    "funcdef",
-            decl_function:   "function",
-            decl_get:        "get",
-            decl_import:     "import",
-            decl_interface:  "interface",
-            decl_namespace:  "namespace",
-            decl_set:        "set",
-            decl_typedef:    "typedef",
-            decl_using:      "using",
-            log_and:         "and",
-            log_or:          "or",
-            log_xor:         "xor",
-            mod_abstract:    "abstract",
-            mod_const:       "const",
-            mod_delete:      "delete",
-            mod_explicit:    "explicit",
-            mod_external:    "external",
-            mod_final:       "final",
-            mod_mixin:       "mixin",
-            mod_override:    "override",
-            mod_private:     "private",
-            mod_property:    "property",
-            mod_protected:   "protected",
-            mod_shared:      "shared",
-            nullptr:         "null",
-            prim_auto:       "auto",
-            prim_bool:       "bool",
-            prim_double:     "double",
-            prim_float:      "float",
-            prim_int:        "int",
-            prim_int8:       "int8",
-            prim_int16:      "int16",
-            prim_int32:      "int32",
-            prim_int64:      "int64",
-            prim_uint:       "uint",
-            prim_uint8:      "uint8",
-            prim_uint16:     "uint16",
-            prim_uint32:     "uint32",
-            prim_uint64:     "uint64",
-            prim_void:       "void",
-            ref_in:          "in",
-            ref_inout:       "inout",
-            ref_out:         "out",
-            std_array:       "array",
-            std_dictionary:  "dictionary",
-            std_ref:         "ref",
-            std_string:      "string",
-            stmt_catch:      "catch",
-            stmt_do:         "do",
-            stmt_else:       "else",
-            stmt_for:        "for",
-            stmt_foreach:    "foreach",
-            stmt_if:         "if",
-            stmt_switch:     "switch",
-            stmt_try:        "try",
-            stmt_while:      "while"
+            kw_abstract:   "abstract",
+            kw_and:        "and",
+            kw_auto:       "auto",
+            kw_bool:       "bool",
+            kw_break:      "break",
+            kw_case:       "case",
+            kw_cast:       "cast",
+            kw_catch:      "catch",
+            kw_class:      "class",
+            kw_const:      "const",
+            kw_continue:   "continue",
+            kw_default:    "default",
+            kw_delete:     "delete",
+            kw_do:         "do",
+            kw_double:     "double",
+            kw_else:       "else",
+            kw_enum:       "enum",
+            kw_explicit:   "explicit",
+            kw_external:   "external",
+            kw_false:      "false",
+            kw_final:      "final",
+            kw_float:      "float",
+            kw_for:        "for",
+            kw_foreach:    "foreach",
+            kw_from:       "from",
+            kw_funcdef:    "funcdef",
+            kw_function:   "function",
+            kw_get:        "get",
+            kw_if:         "if",
+            kw_import:     "import",
+            kw_in:         "in",
+            kw_inout:      "inout",
+            kw_int:        "int",
+            kw_int8:       "int8",
+            kw_int16:      "int16",
+            kw_int32:      "int32",
+            kw_int64:      "int64",
+            kw_interface:  "interface",
+            kw_is:         "is",
+            kw_mixin:      "mixin",
+            kw_namespace:  "namespace",
+            kw_null:       "null",
+            kw_or:         "or",
+            kw_out:        "out",
+            kw_override:   "override",
+            kw_private:    "private",
+            kw_property:   "property",
+            kw_protected:  "protected",
+            kw_return:     "return",
+            kw_set:        "set",
+            kw_shared:     "shared",
+            kw_super:      "super",
+            kw_switch:     "switch",
+            kw_this:       "this",
+            kw_true:       "true",
+            kw_try:        "try",
+            kw_typedef:    "typedef",
+            kw_uint:       "uint",
+            kw_uint8:      "uint8",
+            kw_uint16:     "uint16",
+            kw_uint32:     "uint32",
+            kw_uint64:     "uint64",
+            kw_using:      "using",
+            kw_void:       "void",
+            kw_while:      "while",
+            kw_xor:        "xor",
         })
     },
     num_scientific: {
@@ -89,12 +88,12 @@ const lexer = moo.compile({
         }
     },
     num_float: {
-        match: /(?:[0-9](?:'?[0-9])*\.(?:[0-9](?:'?[0-9])*)?|[0-9]*\.[0-9](?:'?[0-9])*)f?/,
+        match: /(?:[0-9](?:'?[0-9])*\.(?:[0-9](?:'?[0-9])*)?|[0-9]*\.[0-9](?:'?[0-9])*)[df]?/,
         value: v => parseFloat(v.replaceAll("'", ""))
     },
     num_hexadecimal: {
         match: /0[Xx][0-9A-Fa-f](?:'?[0-9A-Fa-f])*/,
-        value: v => parseInt(v.replaceAll("'", ""), 16)
+        value: v => parseInt(v.replaceAll("'", ""), 16)  // don't need to replace 0[Xx]
     },
     num_octal: {
         match: /0[Oo][0-7](?:'?[0-7])*/,
@@ -114,17 +113,52 @@ const lexer = moo.compile({
     rbracket: "]",
     lparen: "(",
     rparen: ")",
+    increment: "++",
+    pluseq: "+=",
+    plus: "+",
+    decrement: "--",
+    minuseq: "-=",
+    dash: "-",
+    poweq: "**=",
+    pow: "**",
+    timeseq: "*=",
+    star: "*",
+    diveq: "/=",
+    slash: "/",
+    modeq: "%=",
+    percent: "%",
+    lshifteq: "<<=",
+    lshift: "<<",
     lte: "<=",
-    lt: "<",
+    larrow: "<",
+    rlogshifteq: ">>>=",
+    rlogshift: ">>>",
+    rshifteq: ">>=",
+    rshift: ">>",
     gte: ">=",
-    gt: ">",
-    scope_access: "::",
-    member_access: ".",
-    question: "?",
+    rarrow: ">",
+    and: "&&",
+    andeq: "&=",
+    amp: "&",
+    or: "||",
+    oreq: "|=",
+    bar: "|",
+    xor: "^^",
+    xoreq: "^=",
+    carrot: "^",
+    eq: "==",
+    neq: "!=",
+    assign: "=",
+    scope: "::",
     colon: ":",
+    semi: ";",
     comma: ",",
-    handle: "@",
-    sentinel: /;/,
+    ellipses: "...",
+    dot: ".",
+    question: "?",
+    bang: "!",
+    at: "@",
+    tilde: "~",
     whitespace: {
         match: /\s+/,
         lineBreaks: true
@@ -134,20 +168,84 @@ const lexer = moo.compile({
 
 @lexer lexer
 
-program -> ( _ statement ):+ _ {% d => d[0].map(v => v[1]).filter(s => s !== null) %}
+SCRIPT        -> ( IMPORT | ENUM | TYPEDEF | CLASS | MIXIN | INTERFACE | FUNCDEF | VIRTPROP | VAR | FUNC | NAMESPACE | USING | %semi ):*
+IMPORT        -> %kw_import TYPE %amp:? %identifier PARAMLIST FUNCATTR %kw_from %string %semi
+USING         -> %kw_using %kw_namespace %identifier ( %scope %identifier ):* %semi
+NAMESPACE     -> %kw_namespace %identifier ( %scope %identifier ):* %lbrace SCRIPT %rbrace
+ENUM          -> ( %kw_shared | %kw_external ):* %kw_enum %identifier ( %colon ( %kw_int | %kw_int8 | %kw_int16 | %kw_int32 | %kw_int64 | %kw_uint | %kw_uint8 | %kw_uint16 | %kw_uint32 | %kw_uint64 ) ):? ( %semi | ( %lbrace %identifier ( %assign EXPR ):? ( %comma %identifier ( %assign EXPR ):? ):* %rbrace ) )
+FUNCDEF       -> ( %kw_external | %kw_shared ):* %kw_funcdef TYPE %amp:? %identifier PARAMLIST %semi
+FUNC          -> ( %kw_shared | %kw_external ):* ( %kw_private | %kw_protected ):? ( ( ( TYPE %amp:? ) | %tilde ) ):? _ %identifier PARAMLIST _ %kw_const:? FUNCATTR ( %semi | STATBLOCK )
+VIRTPROP      -> ( %kw_private | %kw_protected ):? TYPE %amp:? %identifier %lbrace ( ( %kw_get | %kw_set ) %kw_const:? FUNCATTR ( STATBLOCK | %semi ) ):* %rbrace
+INTERFACE     -> ( %kw_external | %kw_shared ):* %kw_interface %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | INTFMTHD ):* %rbrace ) )
+MIXIN         -> %kw_mixin CLASS
+CLASS         -> ( %kw_shared | %kw_abstract | %kw_final | %kw_external ):* %kw_class %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | FUNC | VAR | FUNCDEF ):* %rbrace ) )
+VAR           -> ( %kw_private | %kw_protected ):? TYPE %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ( %comma %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ):* %semi
+TYPEDEF       -> %kw_typedef PRIMTYPE %identifier %semi
+INTFMTHD      -> TYPE %amp:? %identifier PARAMLIST %kw_const:? %semi
+STATBLOCK     -> %lbrace ( VAR | STATEMENT | USING ):* %rbrace
+PARAMLIST     -> %lparen ( %kw_void | ( TYPE TYPEMOD ( %ellipses | %identifier:? ( %assign EXPR ):? ) ( %comma TYPE TYPEMOD ( %ellipses | %identifier:? ( %assign EXPR ):? ) ):* ) ):? %rparen
+TYPEMOD       -> ( %amp ( %kw_in | %kw_out | %kw_inout ):? ):?
+TYPE          -> %kw_const:? SCOPE DATATYPE TEMPLTYPELIST:? ( ( %lbrace %rbrace ) | ( %at %kw_const:? ) ):*
+TEMPLTYPELIST -> %larrow TYPE ( %comma TYPE ):* %rarrow
+INITLIST      -> %lbrace ( ASSIGN | INITLIST ):? ( %comma ( ASSIGN | INITLIST ):? ):* %rbrace
+SCOPE         -> %scope:? ( %identifier %scope ):* ( %identifier TEMPLTYPELIST:? %scope ):?
+DATATYPE      -> ( %identifier | PRIMTYPE | %question | %kw_auto )
+PRIMTYPE      -> %kw_void | %kw_int | %kw_int8 | %kw_int16 | %kw_int32 | %kw_int64 | %kw_uint | %kw_uint8 | %kw_uint16 | %kw_uint32 | %kw_uint64 | %kw_float | %kw_double | %kw_bool
+FUNCATTR      -> ( %kw_override | %kw_final | %kw_explicit | %kw_property | %kw_delete ):*
+STATEMENT     -> ( IF | FOR | FOREACH | WHILE | RETURN | STATBLOCK | BREAK | CONTINUE | DOWHILE | SWITCH | EXPRSTAT | TRY )
+EXPRSTAT      -> ASSIGN:? %semi
+SWITCH        -> %kw_switch %lparen ASSIGN %rparen %lbrace CASE:* %rbrace
+IF            -> %kw_if %lparen ASSIGN %rparen STATEMENT ( %kw_else STATEMENT ):?
+TRY           -> %kw_try STATBLOCK %kw_catch STATBLOCK
+FOR           -> %kw_for %lparen ( VAR | EXPRSTAT ) EXPRSTAT ( ASSIGN ( %comma ASSIGN ):* ):? %rparen STATEMENT
+FOREACH       -> %kw_foreach %lparen TYPE %identifier ( %comma TYPE %identifier ):* %colon ASSIGN %rparen STATEMENT
+WHILE         -> %kw_while %lparen ASSIGN %rparen STATEMENT
+DOWHILE       -> %kw_do STATEMENT %kw_while %lparen ASSIGN %rparen %semi
+RETURN        -> %kw_return ASSIGN:? %semi
+BREAK         -> %kw_break %semi
+CONTINUE      -> %kw_continue %semi
+EXPR          -> EXPRTERM ( EXPROP EXPRTERM ):*
+CASE          -> ( ( %kw_case EXPR ) | %kw_default ) %colon STATEMENT:*
+EXPRTERM      -> ( ( TYPE %assign ):? INITLIST ) | ( EXPRPREOP:* EXPRVALUE EXPRPOSTOP:* )
+EXPRVALUE     -> %kw_void | CONSTRUCTCALL | FUNCCALL | VARACCESS | CAST | LITERAL | %lparen ASSIGN %rparen | LAMBDA
+CONSTRUCTCALL -> TYPE ARGLIST
+EXPRPREOP     -> %dash | %plus | %bang | %increment | %decrement | %tilde | %at
+EXPRPOSTOP    -> ( %dot ( FUNCCALL | %identifier ) ) | ( %lbrace ( %identifier %colon ):? ASSIGN ( %comma ( %identifier %colon ):? ASSIGN ):* %rbrace ) | ARGLIST | %increment | %decrement
+CAST          -> %kw_cast %larrow TYPE %rarrow %lparen ASSIGN %rparen
+LITERAL       -> number | %string | boolean | %kw_null
+LAMBDA        -> %kw_function %lparen ( ( TYPE TYPEMOD ):? %identifier:? ( %comma ( TYPE TYPEMOD ):? %identifier:? ):* ):? %rparen STATBLOCK
+FUNCCALL      -> SCOPE %identifier TEMPLTYPELIST:? ARGLIST
+VARACCESS     -> SCOPE %identifier
+ARGLIST       -> %lparen ( %identifier %colon ):? ASSIGN ( %comma ( %identifier %colon ):? ASSIGN ):* %rparen
+ASSIGN        -> CONDITION ( ASSIGNOP ASSIGN ):?
+CONDITION     -> EXPR ( %question ASSIGN %colon ASSIGN ):?
+EXPROP        -> MATHOP | COMPOP | LOGICOP | BITOP
+MATHOP        -> %plus | %dash | %star | %slash | %percent | %pow
+COMPOP        -> %eq | %neq | %larrow | %lte | %rarrow | %gte | %kw_is | %bang %kw_is
+LOGICOP       -> %and | %or | %xor | %kw_and | %kw_or | %kw_xor
+BITOP         -> %amp | %bar | %carrot | %lshift | %rshift | %rlogshift
+ASSIGNOP      -> %assign | %pluseq | %minuseq | %timeseq | %diveq | %oreq | %andeq | %xoreq | %modeq | %poweq | %lshifteq | %rshifteq | %rlogshifteq
+# IDENTIFIER    -> [A-Za-z_][A-Za-z0-9_]*
+# NUMBER        -> DIGITS(%dot DIGITS)? ([eE] DIGITS)?
+# DIGITS        -> [0-9](("'")? [0-9])*
+# STRING        -> '"' ('\'. | [^"\#x0D\#x0A\\])* '"'
+# BITS          -> '0'[bBoOdDxX][0-9A-Fa-f](("'")? [0-9A-Fa-f])*
+# COMMENT       -> ('//'[^#x0A]*) | ('/*'[^*]*'*/')
 
-statement -> expression:? _ %sentinel {% d => d[0] %}
-statement -> %lbrace _ statement _ %rbrace {% d => d[2] %}
+# program -> ( _ statement ):+ _ {% d => d[0].map(v => v[1]).filter(s => s !== null) %}
 
-expression -> constant {% id %}
-expression -> %lparen _ expression _ %rparen {% d => d[2] %}
+# statement -> expression:? _ %semi {% d => d[0] %}
+# statement -> %lbrace _ statement _ %rbrace {% d => d[2] %}
 
-constant -> boolean {% d => { d[0].value = d[0].text === "true"; return d[0] } %}
-constant -> %nullptr {% d => { d[0].value = null; return d[0] } %}
-constant -> number {% id %}
+# expression -> constant {% id %}
+# expression -> %lparen _ expression _ %rparen {% d => d[2] %}
 
-boolean -> %bool_false {% id %}
-boolean -> %bool_true {% id %}
+# constant -> boolean {% d => { d[0].value = d[0].text === "true"; return d[0] } %}
+# constant -> %nullptr {% d => { d[0].value = null; return d[0] } %}
+# constant -> number {% id %}
+
+boolean -> %kw_false {% id %}
+boolean -> %kw_true {% id %}
 
 number -> %num_scientific {% id %}
 number -> %num_float {% id %}
