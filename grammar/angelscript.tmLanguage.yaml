@@ -81,15 +81,15 @@ repository:
   number:
     patterns:
       - name: constant.numeric.binary.angelscript
-        match: 0[bB][01]+
+        match: 0[Bb][01](?:'?[01])*
       - name: constant.numeric.float.angelscript
         match: '[0-9]*\.[0-9]*[df]?'
       - name: constant.numeric.hexadecimal.angelscript
-        match: 0[xX][0-9a-fA-F]+
+        match: 0[Xx][0-9A-Fa-f]+
       - name: constant.numeric.integer.angelscript
-        match: '[0-9]+'
+        match: (?:0[Dd])?[0-9](?:'?[0-9])*
       - name: constant.numeric.octal.angelscript
-        match: 0[oO][0-7]+
+        match: 0[Oo][0-7]+
   preprocessor:
     name: meta.preprocessor.angelscript
     begin: ^#
