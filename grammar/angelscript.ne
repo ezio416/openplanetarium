@@ -1,4 +1,5 @@
 # angelscript grammar reference: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_bnf.html
+# some changes needed to be made as the official reference is not perfect
 
 @{%
 const moo = require("moo")
@@ -7,6 +8,7 @@ const lexer = moo.compile({
         match: /"(?:[^\n\\"]|\\["\\ntbfr])*"/,
         value: v => JSON.parse(v)
     },
+    // TODO comments
     identifier: {
         match: /[A-Z_a-z][0-9A-Z_a-z]*/,
         type: moo.keywords({
@@ -107,58 +109,58 @@ const lexer = moo.compile({
         match: /(?:0[Dd])?[0-9](?:'?[0-9])*/,
         value: v => parseInt(v.replace("0D", "").replace("0d", "").replaceAll("'", ""))
     },
-    lbrace: "{",
-    rbrace: "}",
-    lbracket: "[",
-    rbracket: "]",
-    lparen: "(",
-    rparen: ")",
-    increment: "++",
-    pluseq: "+=",
-    plus: "+",
-    decrement: "--",
-    minuseq: "-=",
-    dash: "-",
-    poweq: "**=",
-    pow: "**",
-    timeseq: "*=",
-    star: "*",
-    diveq: "/=",
-    slash: "/",
-    modeq: "%=",
-    percent: "%",
-    lshifteq: "<<=",
-    lshift: "<<",
-    lte: "<=",
-    larrow: "<",
+    lbrace:      "{",
+    rbrace:      "}",
+    lbracket:    "[",
+    rbracket:    "]",
+    lparen:      "(",
+    rparen:      ")",
+    increment:   "++",
+    pluseq:      "+=",
+    plus:        "+",
+    decrement:   "--",
+    minuseq:     "-=",
+    dash:        "-",
+    poweq:       "**=",
+    pow:         "**",
+    timeseq:     "*=",
+    star:        "*",
+    diveq:       "/=",
+    slash:       "/",
+    modeq:       "%=",
+    percent:     "%",
+    lshifteq:    "<<=",
+    lshift:      "<<",
+    lte:         "<=",
+    larrow:      "<",
     rlogshifteq: ">>>=",
-    rlogshift: ">>>",
-    rshifteq: ">>=",
-    rshift: ">>",
-    gte: ">=",
-    rarrow: ">",
-    and: "&&",
-    andeq: "&=",
-    amp: "&",
-    or: "||",
-    oreq: "|=",
-    bar: "|",
-    xor: "^^",
-    xoreq: "^=",
-    carrot: "^",
-    eq: "==",
-    neq: "!=",
-    assign: "=",
-    scope: "::",
-    colon: ":",
-    semi: ";",
-    comma: ",",
-    ellipses: "...",
-    dot: ".",
-    question: "?",
-    bang: "!",
-    at: "@",
-    tilde: "~",
+    rlogshift:   ">>>",
+    rshifteq:    ">>=",
+    rshift:      ">>",
+    gte:         ">=",
+    rarrow:      ">",
+    and:         "&&",
+    andeq:       "&=",
+    amp:         "&",
+    or:          "||",
+    oreq:        "|=",
+    bar:         "|",
+    xor:         "^^",
+    xoreq:       "^=",
+    carrot:      "^",
+    eq:          "==",
+    neq:         "!=",
+    assign:      "=",
+    scope:       "::",
+    colon:       ":",
+    semi:        ";",
+    comma:       ",",
+    ellipses:    "...",
+    dot:         ".",
+    question:    "?",
+    bang:        "!",
+    at:          "@",
+    tilde:       "~",
     whitespace: {
         match: /\s+/,
         lineBreaks: true
@@ -168,69 +170,63 @@ const lexer = moo.compile({
 
 @lexer lexer
 
-SCRIPT        -> ( IMPORT | ENUM | TYPEDEF | CLASS | MIXIN | INTERFACE | FUNCDEF | VIRTPROP | VAR | FUNC | NAMESPACE | USING | %semi ):*
-IMPORT        -> %kw_import TYPE %amp:? %identifier PARAMLIST FUNCATTR %kw_from %string %semi
-USING         -> %kw_using %kw_namespace %identifier ( %scope %identifier ):* %semi
-NAMESPACE     -> %kw_namespace %identifier ( %scope %identifier ):* %lbrace SCRIPT %rbrace
-ENUM          -> ( %kw_shared | %kw_external ):* %kw_enum %identifier ( %colon ( %kw_int | %kw_int8 | %kw_int16 | %kw_int32 | %kw_int64 | %kw_uint | %kw_uint8 | %kw_uint16 | %kw_uint32 | %kw_uint64 ) ):? ( %semi | ( %lbrace %identifier ( %assign EXPR ):? ( %comma %identifier ( %assign EXPR ):? ):* %rbrace ) )
-FUNCDEF       -> ( %kw_external | %kw_shared ):* %kw_funcdef TYPE %amp:? %identifier PARAMLIST %semi
-FUNC          -> ( %kw_shared | %kw_external ):* ( %kw_private | %kw_protected ):? ( ( ( TYPE %amp:? ) | %tilde ) ):? _ %identifier PARAMLIST _ %kw_const:? FUNCATTR ( %semi | STATBLOCK )
-VIRTPROP      -> ( %kw_private | %kw_protected ):? TYPE %amp:? %identifier %lbrace ( ( %kw_get | %kw_set ) %kw_const:? FUNCATTR ( STATBLOCK | %semi ) ):* %rbrace
-INTERFACE     -> ( %kw_external | %kw_shared ):* %kw_interface %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | INTFMTHD ):* %rbrace ) )
-MIXIN         -> %kw_mixin CLASS
-CLASS         -> ( %kw_shared | %kw_abstract | %kw_final | %kw_external ):* %kw_class %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | FUNC | VAR | FUNCDEF ):* %rbrace ) )
-VAR           -> ( %kw_private | %kw_protected ):? TYPE %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ( %comma %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ):* %semi
-TYPEDEF       -> %kw_typedef PRIMTYPE %identifier %semi
-INTFMTHD      -> TYPE %amp:? %identifier PARAMLIST %kw_const:? %semi
-STATBLOCK     -> %lbrace ( VAR | STATEMENT | USING ):* %rbrace
-PARAMLIST     -> %lparen ( %kw_void | ( TYPE TYPEMOD ( %ellipses | %identifier:? ( %assign EXPR ):? ) ( %comma TYPE TYPEMOD ( %ellipses | %identifier:? ( %assign EXPR ):? ) ):* ) ):? %rparen
-TYPEMOD       -> ( %amp ( %kw_in | %kw_out | %kw_inout ):? ):?
-TYPE          -> %kw_const:? SCOPE DATATYPE TEMPLTYPELIST:? ( ( %lbrace %rbrace ) | ( %at %kw_const:? ) ):*
-TEMPLTYPELIST -> %larrow TYPE ( %comma TYPE ):* %rarrow
-INITLIST      -> %lbrace ( ASSIGN | INITLIST ):? ( %comma ( ASSIGN | INITLIST ):? ):* %rbrace
-SCOPE         -> %scope:? ( %identifier %scope ):* ( %identifier TEMPLTYPELIST:? %scope ):?
-DATATYPE      -> ( %identifier | PRIMTYPE | %question | %kw_auto )
-PRIMTYPE      -> %kw_void | %kw_int | %kw_int8 | %kw_int16 | %kw_int32 | %kw_int64 | %kw_uint | %kw_uint8 | %kw_uint16 | %kw_uint32 | %kw_uint64 | %kw_float | %kw_double | %kw_bool
-FUNCATTR      -> ( %kw_override | %kw_final | %kw_explicit | %kw_property | %kw_delete ):*
-STATEMENT     -> ( IF | FOR | FOREACH | WHILE | RETURN | STATBLOCK | BREAK | CONTINUE | DOWHILE | SWITCH | EXPRSTAT | TRY )
-EXPRSTAT      -> ASSIGN:? %semi
-SWITCH        -> %kw_switch %lparen ASSIGN %rparen %lbrace CASE:* %rbrace
-IF            -> %kw_if %lparen ASSIGN %rparen STATEMENT ( %kw_else STATEMENT ):?
-TRY           -> %kw_try STATBLOCK %kw_catch STATBLOCK
-FOR           -> %kw_for %lparen ( VAR | EXPRSTAT ) EXPRSTAT ( ASSIGN ( %comma ASSIGN ):* ):? %rparen STATEMENT
-FOREACH       -> %kw_foreach %lparen TYPE %identifier ( %comma TYPE %identifier ):* %colon ASSIGN %rparen STATEMENT
-WHILE         -> %kw_while %lparen ASSIGN %rparen STATEMENT
-DOWHILE       -> %kw_do STATEMENT %kw_while %lparen ASSIGN %rparen %semi
-RETURN        -> %kw_return ASSIGN:? %semi
-BREAK         -> %kw_break %semi
-CONTINUE      -> %kw_continue %semi
-EXPR          -> EXPRTERM ( EXPROP EXPRTERM ):*
-CASE          -> ( ( %kw_case EXPR ) | %kw_default ) %colon STATEMENT:*
-EXPRTERM      -> ( ( TYPE %assign ):? INITLIST ) | ( EXPRPREOP:* EXPRVALUE EXPRPOSTOP:* )
-EXPRVALUE     -> %kw_void | CONSTRUCTCALL | FUNCCALL | VARACCESS | CAST | LITERAL | %lparen ASSIGN %rparen | LAMBDA
-CONSTRUCTCALL -> TYPE ARGLIST
-EXPRPREOP     -> %dash | %plus | %bang | %increment | %decrement | %tilde | %at
-EXPRPOSTOP    -> ( %dot ( FUNCCALL | %identifier ) ) | ( %lbrace ( %identifier %colon ):? ASSIGN ( %comma ( %identifier %colon ):? ASSIGN ):* %rbrace ) | ARGLIST | %increment | %decrement
-CAST          -> %kw_cast %larrow TYPE %rarrow %lparen ASSIGN %rparen
-LITERAL       -> number | %string | boolean | %kw_null
-LAMBDA        -> %kw_function %lparen ( ( TYPE TYPEMOD ):? %identifier:? ( %comma ( TYPE TYPEMOD ):? %identifier:? ):* ):? %rparen STATBLOCK
-FUNCCALL      -> SCOPE %identifier TEMPLTYPELIST:? ARGLIST
-VARACCESS     -> SCOPE %identifier
-ARGLIST       -> %lparen ( %identifier %colon ):? ASSIGN ( %comma ( %identifier %colon ):? ASSIGN ):* %rparen
-ASSIGN        -> CONDITION ( ASSIGNOP ASSIGN ):?
-CONDITION     -> EXPR ( %question ASSIGN %colon ASSIGN ):?
-EXPROP        -> MATHOP | COMPOP | LOGICOP | BITOP
-MATHOP        -> %plus | %dash | %star | %slash | %percent | %pow
-COMPOP        -> %eq | %neq | %larrow | %lte | %rarrow | %gte | %kw_is | %bang %kw_is
-LOGICOP       -> %and | %or | %xor | %kw_and | %kw_or | %kw_xor
-BITOP         -> %amp | %bar | %carrot | %lshift | %rshift | %rlogshift
-ASSIGNOP      -> %assign | %pluseq | %minuseq | %timeseq | %diveq | %oreq | %andeq | %xoreq | %modeq | %poweq | %lshifteq | %rshifteq | %rlogshifteq
-# IDENTIFIER    -> [A-Za-z_][A-Za-z0-9_]*
-# NUMBER        -> DIGITS(%dot DIGITS)? ([eE] DIGITS)?
-# DIGITS        -> [0-9](("'")? [0-9])*
-# STRING        -> '"' ('\'. | [^"\#x0D\#x0A\\])* '"'
-# BITS          -> '0'[bBoOdDxX][0-9A-Fa-f](("'")? [0-9A-Fa-f])*
-# COMMENT       -> ('//'[^#x0A]*) | ('/*'[^*]*'*/')
+# SCRIPT        -> ( IMPORT | ENUM | TYPEDEF | CLASS | MIXIN | INTERFACE | FUNCDEF | VIRTPROP | VAR | FUNC | NAMESPACE | USING | %semi ):*
+# IMPORT        -> %kw_import TYPE %amp:? %identifier PARAMLIST FUNCATTR %kw_from %string %semi
+# USING         -> %kw_using %kw_namespace %identifier ( %scope %identifier ):* %semi
+# NAMESPACE     -> %kw_namespace %identifier ( %scope %identifier ):* %lbrace SCRIPT %rbrace
+# ENUM          -> ( %kw_shared | %kw_external ):* %kw_enum %identifier ( %colon ( %kw_int | %kw_int8 | %kw_int16 | %kw_int32 | %kw_int64 | %kw_uint | %kw_uint8 | %kw_uint16 | %kw_uint32 | %kw_uint64 ) ):? ( %semi | ( %lbrace %identifier ( %assign EXPR ):? ( %comma %identifier ( %assign EXPR ):? ):* %rbrace ) )
+# FUNCDEF       -> ( %kw_external | %kw_shared ):* %kw_funcdef TYPE %amp:? %identifier PARAMLIST %semi
+# FUNC          -> ( %kw_shared | %kw_external ):* ( %kw_private | %kw_protected ):? ( ( ( TYPE %amp:? ) | %tilde ) ):? _ %identifier PARAMLIST _ %kw_const:? FUNCATTR ( %semi | STATBLOCK )
+# VIRTPROP      -> ( %kw_private | %kw_protected ):? TYPE %amp:? %identifier %lbrace ( ( %kw_get | %kw_set ) %kw_const:? FUNCATTR ( STATBLOCK | %semi ) ):* %rbrace
+# INTERFACE     -> ( %kw_external | %kw_shared ):* %kw_interface %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | INTFMTHD ):* %rbrace ) )
+# MIXIN         -> %kw_mixin CLASS
+# CLASS         -> ( %kw_shared | %kw_abstract | %kw_final | %kw_external ):* %kw_class %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | FUNC | VAR | FUNCDEF ):* %rbrace ) )
+# VAR           -> ( %kw_private | %kw_protected ):? TYPE %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ( %comma %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ):* %semi
+# TYPEDEF       -> %kw_typedef PRIMTYPE %identifier %semi
+# INTFMTHD      -> TYPE %amp:? %identifier PARAMLIST %kw_const:? %semi
+# STATBLOCK     -> %lbrace ( VAR | STATEMENT | USING ):* %rbrace
+# PARAMLIST     -> %lparen ( %kw_void | ( TYPE TYPEMOD ( %ellipses | %identifier:? ( %assign EXPR ):? ) ( %comma TYPE TYPEMOD ( %ellipses | %identifier:? ( %assign EXPR ):? ) ):* ) ):? %rparen
+ # TYPEMOD       -> ( %amp ( %kw_in | %kw_out | %kw_inout ):? ):?
+ # TYPE          -> %kw_const:? SCOPE DATATYPE TEMPLTYPELIST:? ( ( %lbrace %rbrace ) | ( %at %kw_const:? ) ):*
+ # TEMPLTYPELIST -> %larrow TYPE ( %comma TYPE ):* %rarrow
+# INITLIST      -> %lbrace ( ASSIGN | INITLIST ):? ( %comma ( ASSIGN | INITLIST ):? ):* %rbrace
+ # SCOPE         -> %scope:? ( %identifier %scope ):* ( %identifier TEMPLTYPELIST:? %scope ):?
+ # DATATYPE      -> ( %identifier | PRIMTYPE | %question | %kw_auto )
+ # PRIMTYPE      -> %kw_void | %kw_int | %kw_int8 | %kw_int16 | %kw_int32 | %kw_int64 | %kw_uint | %kw_uint8 | %kw_uint16 | %kw_uint32 | %kw_uint64 | %kw_float | %kw_double | %kw_bool
+# FUNCATTR      -> ( %kw_override | %kw_final | %kw_explicit | %kw_property | %kw_delete ):*
+# STATEMENT     -> ( IF | FOR | FOREACH | WHILE | RETURN | STATBLOCK | BREAK | CONTINUE | DOWHILE | SWITCH | EXPRSTAT | TRY )
+# EXPRSTAT      -> ASSIGN:? %semi
+# SWITCH        -> %kw_switch %lparen ASSIGN %rparen %lbrace CASE:* %rbrace
+# IF            -> %kw_if %lparen ASSIGN %rparen STATEMENT ( %kw_else STATEMENT ):?
+# TRY           -> %kw_try STATBLOCK %kw_catch STATBLOCK
+# FOR           -> %kw_for %lparen ( VAR | EXPRSTAT ) EXPRSTAT ( ASSIGN ( %comma ASSIGN ):* ):? %rparen STATEMENT
+# FOREACH       -> %kw_foreach %lparen TYPE %identifier ( %comma TYPE %identifier ):* %colon ASSIGN %rparen STATEMENT
+# WHILE         -> %kw_while %lparen ASSIGN %rparen STATEMENT
+# DOWHILE       -> %kw_do STATEMENT %kw_while %lparen ASSIGN %rparen %semi
+# RETURN        -> %kw_return ASSIGN:? %semi
+ # BREAK         -> %kw_break %semi
+ # CONTINUE      -> %kw_continue %semi
+# EXPR          -> EXPRTERM ( EXPROP EXPRTERM ):*
+# CASE          -> ( ( %kw_case EXPR ) | %kw_default ) %colon STATEMENT:*
+# EXPRTERM      -> ( ( TYPE %assign ):? INITLIST ) | ( EXPRPREOP:* EXPRVALUE EXPRPOSTOP:* )
+# EXPRVALUE     -> %kw_void | CONSTRUCTCALL | FUNCCALL | VARACCESS | CAST | LITERAL | %lparen ASSIGN %rparen | LAMBDA
+# CONSTRUCTCALL -> TYPE ARGLIST
+ # EXPRPREOP     -> %dash | %plus | %bang | %increment | %decrement | %tilde | %at
+# EXPRPOSTOP    -> ( %dot ( FUNCCALL | %identifier ) ) | ( %lbrace ( %identifier %colon ):? ASSIGN ( %comma ( %identifier %colon ):? ASSIGN ):* %rbrace ) | ARGLIST | %increment | %decrement
+# CAST          -> %kw_cast %larrow TYPE %rarrow %lparen ASSIGN %rparen
+ # LITERAL       -> number | %string | boolean | %kw_null
+# LAMBDA        -> %kw_function %lparen ( ( TYPE TYPEMOD ):? %identifier:? ( %comma ( TYPE TYPEMOD ):? %identifier:? ):* ):? %rparen STATBLOCK
+# FUNCCALL      -> SCOPE %identifier TEMPLTYPELIST:? ARGLIST
+# VARACCESS     -> SCOPE %identifier
+# ARGLIST       -> %lparen ( %identifier %colon ):? ASSIGN ( %comma ( %identifier %colon ):? ASSIGN ):* %rparen
+# ASSIGN        -> CONDITION ( ASSIGNOP ASSIGN ):?
+# CONDITION     -> EXPR ( %question ASSIGN %colon ASSIGN ):?
+ # EXPROP        -> MATHOP | COMPOP | LOGICOP | BITOP
+ # MATHOP        -> %plus | %dash | %star | %slash | %percent | %pow
+ # COMPOP        -> %eq | %neq | %larrow | %lte | %rarrow | %gte | %kw_is | %bang %kw_is
+ # LOGICOP       -> %and | %or | %xor | %kw_and | %kw_or | %kw_xor
+ # BITOP         -> %amp | %bar | %carrot | %lshift | %rshift | %rlogshift
+ # ASSIGNOP      -> %assign | %pluseq | %minuseq | %timeseq | %diveq | %oreq | %andeq | %xoreq | %modeq | %poweq | %lshifteq | %rshifteq | %rlogshifteq
 
 # program -> ( _ statement ):+ _ {% d => d[0].map(v => v[1]).filter(s => s !== null) %}
 
@@ -240,18 +236,200 @@ ASSIGNOP      -> %assign | %pluseq | %minuseq | %timeseq | %diveq | %oreq | %and
 # expression -> constant {% id %}
 # expression -> %lparen _ expression _ %rparen {% d => d[2] %}
 
-# constant -> boolean {% d => { d[0].value = d[0].text === "true"; return d[0] } %}
-# constant -> %nullptr {% d => { d[0].value = null; return d[0] } %}
-# constant -> number {% id %}
+@{%
 
-boolean -> %kw_false {% id %}
-boolean -> %kw_true {% id %}
+function idd(d) {
+    return d[0][0]
+}
 
-number -> %num_scientific {% id %}
-number -> %num_float {% id %}
-number -> %num_hexadecimal {% id %}
-number -> %num_octal {% id %}
-number -> %num_binary {% id %}
-number -> %num_integer {% id %}
+function token(d) {
+    return {
+        type:   d.type,
+        value:  d.value !== d.text ? d.value : undefined,
+        text:   d.text,
+        offset: d.offset,
+        line:   d.line,
+        col:    d.col,
+    }
+}
+
+%}
+
+script -> _ ( ( test | typedef ) _ ):* {% d => {
+    return {
+        script: d[1].map(v => v[0])
+    }
+} %}
+
+test -> type _ %semi {% id %}
+
+typedef -> %kw_typedef _ prim_type _ %identifier _ %semi {% d => {
+    return {
+        old: d[2],
+        new: token(d[4])
+    }
+} %}
+
+type_mod -> %amp ( _ ( %kw_in | %kw_out | %kw_inout ) ):? {% d => {
+    ret = [ token(d[0]) ]
+    if (d.length > 1 && d[1]) {
+        ret.push(token(d[1][1][0]))
+    }
+    return ret
+} %}
+
+type -> ( %kw_const _ ):? ( scope _ ):? data_type ( _ templ_type_list ):? ( _ %lbracket ( _ %rbracket ) | _ %at ( _ %kw_const ):? ):* {% d => {
+    return {
+        const: d[0] ? token(d[0][0]) : null,
+        scope: d[1] ? d[1][0] : null,
+        name: d[2],
+        held: d[3] ? d[3][1] : null,
+        mods: d[4].map(v => [
+            token(v[1]),
+            v[2] ? token(v[2][1]) : null
+        ])
+    }
+} %}
+
+templ_type_list -> %larrow _ type ( _ %comma _ type ):* _ %rarrow {% d => {
+    ret = [ d[2] ]
+    if (d[3]) {
+        ret.push(...d[3].map(v => v[3]))
+    }
+    return ret
+} %}
+
+scope -> ( %scope _ ):? %identifier _ ( %scope _ %identifier _ ):* ( templ_type_list _ ):? %scope {% d => {
+    ret = {
+        global: !!d[0],
+        scopes: [ token(d[1]) ],
+        held:   []
+    }
+    if (d[3]) {
+        ret.scopes.push(...d[3].map(v => token(v[2])))
+    }
+    if (d[4]) {
+        ret.held = d[4][0]
+    }
+    return ret
+} %}
+
+data_type -> (
+    %identifier
+    | prim_type
+    # | %question
+    | %kw_auto
+    | %kw_void
+) {% d => token(d[0][0]) %}
+
+prim_type -> (
+    %kw_int
+    | %kw_int8
+    | %kw_int16
+    | %kw_int32
+    | %kw_int64
+    | %kw_uint
+    | %kw_uint8
+    | %kw_uint16
+    | %kw_uint32
+    | %kw_uint64
+    | %kw_float
+    | %kw_double
+    | %kw_bool
+) {% d => token(d[0][0]) %}
+
+break -> %kw_break _ %semi {% d => token(d[0]) %}
+
+continue -> %kw_continue _ %semi {% d => token(d[0]) %}
+
+expr_pre_op -> (
+    %dash
+    | %plus
+    | %bang
+    | %increment
+    | %decrement
+    | %tilde
+    | %at
+) {% d => token(d[0][0]) %}
+
+expr_op -> (
+    math_op
+    | comp_op
+    | logic_op
+    | bit_op
+) {% idd %}
+
+math_op -> (
+    %plus
+    | %dash
+    | %star
+    | %slash
+    | %percent
+    | %pow
+) {% idd %}
+
+comp_op -> (
+    %eq
+    | %neq
+    | %larrow
+    | %lte
+    | %rarrow
+    | %gte
+    | %kw_is
+    | %bang %kw_is
+) {% idd %}
+
+logic_op -> (
+    %and
+    | %or
+    | %xor
+    | %kw_and
+    | %kw_or
+    | %kw_xor
+) {% idd %}
+
+bit_op -> (
+    %amp
+    | %bar
+    | %carrot
+    | %lshift
+    | %rshift
+    | %rlogshift
+) {% idd %}
+
+assign_op -> (
+    %assign
+    | %pluseq
+    | %minuseq
+    | %timeseq
+    | %diveq
+    | %oreq
+    | %andeq
+    | %xoreq
+    | %modeq
+    | %poweq
+    | %lshifteq
+    | %rshifteq
+    | %rlogshifteq
+) {% idd %}
+
+literal -> number   {% id %}
+literal -> %string  {% d => { d[0].value = d[0].text.slice(1, -1); return token(d[0]) } %}
+literal -> boolean  {% d => { d[0].value = d[0].text === "true"; return token(d[0]) } %}
+literal -> %kw_null {% d => { d[0].value = null; return token(d[0]) } %}
+
+number -> (
+    %num_scientific
+    | %num_float
+    | %num_hexadecimal
+    | %num_octal
+    | %num_binary
+    | %num_integer
+) {% d => token(d[0][0]) %}
+
+boolean -> (
+    %kw_false
+    | %kw_true
+) {% idd %}
 
 _ -> %whitespace:*
