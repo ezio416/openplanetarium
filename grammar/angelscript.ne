@@ -203,7 +203,7 @@ const lexer = moo.compile({
 # FOREACH       -> %kw_foreach %lparen TYPE %identifier ( %comma TYPE %identifier ):* %colon ASSIGN %rparen STATEMENT
 # WHILE         -> %kw_while %lparen ASSIGN %rparen STATEMENT
 # DOWHILE       -> %kw_do STATEMENT %kw_while %lparen ASSIGN %rparen %semi
-# RETURN        -> %kw_return ASSIGN:? %semi
+ # RETURN        -> %kw_return ASSIGN:? %semi
  # BREAK         -> %kw_break %semi
  # CONTINUE      -> %kw_continue %semi
 # EXPR          -> EXPRTERM ( EXPROP EXPRTERM ):*
@@ -258,7 +258,7 @@ script -> _ ( ( test | typedef | namespace | using | %semi ) _ ):* {% d => {
     }
 } %}
 
-test -> init_list {% id %}
+test -> return {% id %}
 
 using -> %kw_using _ %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ %semi {% d => {
     ret = {
@@ -406,6 +406,13 @@ expr_stat -> ( assign _ ):? %semi {% d => {
     return {
         parse_type: "expr_stat",
         assign:     d[0] ? d[0][0] : null
+    }
+} %}
+
+return -> %kw_return _ ( assign _ ):? %semi {% d => {
+    return {
+        parse_type: "return",
+        assign:     d[2] ? d[2][0] : null
     }
 } %}
 
