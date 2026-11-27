@@ -1,1 +1,2 @@
-override final;
+namespace a {
+}

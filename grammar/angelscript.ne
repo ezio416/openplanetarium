@@ -173,7 +173,7 @@ const lexer = moo.compile({
 # SCRIPT        -> ( IMPORT | ENUM | TYPEDEF | CLASS | MIXIN | INTERFACE | FUNCDEF | VIRTPROP | VAR | FUNC | NAMESPACE | USING | %semi ):*
 # IMPORT        -> %kw_import TYPE %amp:? %identifier PARAMLIST FUNCATTR %kw_from %string %semi
  # USING         -> %kw_using %kw_namespace %identifier ( %scope %identifier ):* %semi
-# NAMESPACE     -> %kw_namespace %identifier ( %scope %identifier ):* %lbrace SCRIPT %rbrace
+ # NAMESPACE     -> %kw_namespace %identifier ( %scope %identifier ):* %lbrace SCRIPT %rbrace
 # ENUM          -> ( %kw_shared | %kw_external ):* %kw_enum %identifier ( %colon ( %kw_int | %kw_int8 | %kw_int16 | %kw_int32 | %kw_int64 | %kw_uint | %kw_uint8 | %kw_uint16 | %kw_uint32 | %kw_uint64 ) ):? ( %semi | ( %lbrace %identifier ( %assign EXPR ):? ( %comma %identifier ( %assign EXPR ):? ):* %rbrace ) )
 # FUNCDEF       -> ( %kw_external | %kw_shared ):* %kw_funcdef TYPE %amp:? %identifier PARAMLIST %semi
 # FUNC          -> ( %kw_shared | %kw_external ):* ( %kw_private | %kw_protected ):? ( ( ( TYPE %amp:? ) | %tilde ) ):? _ %identifier PARAMLIST _ %kw_const:? FUNCATTR ( %semi | STATBLOCK )
@@ -251,9 +251,10 @@ function token(d) {
 
 %}
 
-script -> _ ( ( test | typedef | using ) _ ):* {% d => {
+script -> _ ( ( test | typedef | namespace | using ) _ ):* {% d => {
     return {
-        script: d[1].map(v => v[0])
+        parse_type: "script",
+        script:     d[1].map(v => v[0])
     }
 } %}
 
@@ -266,6 +267,18 @@ using -> %kw_using _ %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ 
     }
     if (d[5]) {
         ret.ids.push(...d[5].map(v => token(v[3])))
+    }
+    return ret
+} %}
+
+namespace -> %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ %lbrace script %rbrace {% d => {
+    ret = {
+        parse_type: "namespace",
+        ids:        [ token(d[2]) ],
+        script:     d[6]
+    }
+    if (d[3]) {
+        ret.ids.push(...d[3].map(v => token(v[3])))
     }
     return ret
 } %}
