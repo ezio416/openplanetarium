@@ -218,9 +218,9 @@ const lexer = moo.compile({
 # LAMBDA        -> %kw_function %lparen ( ( TYPE TYPEMOD ):? %identifier:? ( %comma ( TYPE TYPEMOD ):? %identifier:? ):* ):? %rparen STATBLOCK
 # FUNCCALL      -> SCOPE %identifier TEMPLTYPELIST:? ARGLIST
  # VARACCESS     -> SCOPE %identifier
-# ARGLIST       -> %lparen ( %identifier %colon ):? ASSIGN ( %comma ( %identifier %colon ):? ASSIGN ):* %rparen
-# ASSIGN        -> CONDITION ( ASSIGNOP ASSIGN ):?
-# CONDITION     -> EXPR ( %question ASSIGN %colon ASSIGN ):?
+ # ARGLIST       -> %lparen ( %identifier %colon ):? ASSIGN ( %comma ( %identifier %colon ):? ASSIGN ):* %rparen
+ # ASSIGN        -> CONDITION ( ASSIGNOP ASSIGN ):?
+ # CONDITION     -> EXPR ( %question ASSIGN %colon ASSIGN ):?
  # EXPROP        -> MATHOP | COMPOP | LOGICOP | BITOP
  # MATHOP        -> %plus | %dash | %star | %slash | %percent | %pow
  # COMPOP        -> %eq | %neq | %larrow | %lte | %rarrow | %gte | %kw_is | %bang %kw_is
@@ -258,7 +258,7 @@ script -> _ ( ( test | typedef | namespace | using | %semi ) _ ):* {% d => {
     }
 } %}
 
-test -> assign _ %semi {% id %}
+test -> arg_list _ %semi {% id %}
 
 using -> %kw_using _ %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ %semi {% d => {
     ret = {
@@ -410,6 +410,28 @@ var_access -> scope _ %identifier {% d => {
         scope:      d[0],
         var:        token(d[2])
     }
+} %}
+
+arg_list -> %lparen _ ( ( %identifier _ %colon _ ):? assign ( _ %comma _ ( %identifier _ %colon _ ):? assign ):* _ ):? %rparen {% d => {
+    ret = {
+        parse_type: "arg_list",
+        args:       []
+    }
+    if (d[2]) {
+        ret.args.push({
+            key:   d[2][0] ? token(d[2][0][0]) : null,
+            value: d[2][1]
+        })
+        if (d[2][2]) {
+            ret.args.push(...d[2][2].map(v => {
+                return {
+                    key:   v[3] ? token(v[3][0]) : null,
+                    value: v[4]
+                }
+            }))
+        }
+    }
+    return ret
 } %}
 
 assign -> condition ( _ assign_op _ assign ):? {% d => {
