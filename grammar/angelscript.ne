@@ -198,7 +198,7 @@ const lexer = moo.compile({
 # STATEMENT     -> ( IF | FOR | FOREACH | WHILE | RETURN | STATBLOCK | BREAK | CONTINUE | DOWHILE | SWITCH | EXPRSTAT | TRY )
  # EXPRSTAT      -> ASSIGN:? %semi
  # SWITCH        -> %kw_switch %lparen ASSIGN %rparen %lbrace CASE:* %rbrace
-# IF            -> %kw_if %lparen ASSIGN %rparen STATEMENT ( %kw_else STATEMENT ):?
+ # IF            -> %kw_if %lparen ASSIGN %rparen STATEMENT ( %kw_else STATEMENT ):?
 # TRY           -> %kw_try STATBLOCK %kw_catch STATBLOCK
 # FOR           -> %kw_for %lparen ( VAR | EXPRSTAT ) EXPRSTAT ( ASSIGN ( %comma ASSIGN ):* ):? %rparen STATEMENT
 # FOREACH       -> %kw_foreach %lparen TYPE %identifier ( %comma TYPE %identifier ):* %colon ASSIGN %rparen STATEMENT
@@ -502,10 +502,10 @@ func_attr_kw -> (
 ) {% d => token(d[0][0]) %}
 
 statement -> (
-    # | IF
+    if
     # | FOR
     # | FOREACH
-    while
+    | while
     | return
     | stat_block
     | break
@@ -528,6 +528,15 @@ switch -> %kw_switch _ %lparen _ assign _ %rparen _ %lbrace _ ( case _ ):* %rbra
         parse_type: "switch",
         assign:     d[4],
         children:   d[10] ? d[10].map(v => v[0]) : []
+    }
+} %}
+
+if -> %kw_if _ %lparen _ assign _ %rparen _ statement ( _ %kw_else _ statement ):? {% d => {
+    return {
+        parse_type: "if",
+        cond:       d[4],
+        stmt:       d[8],
+        else:       d[9] ? d[9][3] : null
     }
 } %}
 

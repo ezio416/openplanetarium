@@ -1,3 +1,5 @@
-while (true) {
+if (true) {
+    ;
+} else {
     ;
 }
