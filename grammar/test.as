@@ -1,1 +1,1 @@
-int & f ( ) const ;
+typedef float f32;

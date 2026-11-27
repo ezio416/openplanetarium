@@ -251,45 +251,45 @@ script -> _ ( ( test | typedef | namespace | using | %semi ) _ ):* {% d => {
     }
 } %}
 
-test -> interface_method {% id %}
+test -> arg_list {% id %}
 
-using -> %kw_using _ %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ %semi {% d => {
+using -> %kw_using _ %kw_namespace _ id ( _ %scope _ id ):* _ %semi {% d => {
     ret = {
         parse_type: "using",
-        ids:        [ token(d[4]) ]
+        ids:        [ d[4] ]
     }
     if (d[5]) {
-        ret.ids.push(...d[5].map(v => token(v[3])))
+        ret.ids.push(...d[5].map(v => v[3]))
     }
     return ret
 } %}
 
-namespace -> %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ %lbrace script %rbrace {% d => {
+namespace -> %kw_namespace _ id ( _ %scope _ id ):* _ %lbrace script %rbrace {% d => {
     ret = {
         parse_type: "namespace",
-        ids:        [ token(d[2]) ],
+        ids:        [ d[2] ],
         script:     d[6]
     }
     if (d[3]) {
-        ret.ids.push(...d[3].map(v => token(v[3])))
+        ret.ids.push(...d[3].map(v => v[3]))
     }
     return ret
 } %}
 
-typedef -> %kw_typedef _ prim_type _ %identifier _ %semi {% d => {
+typedef -> %kw_typedef _ prim_type _ id _ %semi {% d => {
     return {
         parse_type: "typedef",
         old:        token(d[2]),
-        new:        token(d[4])
+        new:        d[4]
     }
 } %}
 
-interface_method -> type _ ( %amp _ ):? %identifier _ param_list _ ( %kw_const _ ):? %semi {% d => {
+interface_method -> type _ ( %amp _ ):? id _ param_list _ ( %kw_const _ ):? %semi {% d => {
     return {
         parse_type: "interface_method",
         type:       d[0],
         ref:        !!d[2],
-        name:       token(d[3]),
+        name:       d[3],
         params:     d[5],
         const:      !!d[7]
     }
@@ -386,15 +386,15 @@ init_list_item -> (
     | init_list
 ) {% d => d[0][0] %}
 
-scope -> ( %scope _ ):? %identifier _ ( %scope _ %identifier _ ):* ( templ_type_list _ ):? %scope {% d => {
+scope -> ( %scope _ ):? id _ ( %scope _ id _ ):* ( templ_type_list _ ):? %scope {% d => {
     ret = {
         parse_type: "scope",
         global:     !!d[0],
-        scopes:     [ token(d[1]) ],
+        scopes:     [ d[1] ],
         template:   d[4] ? d[4][0] : []
     }
     if (d[3]) {
-        ret.scopes.push(...d[3].map(v => token(v[2])))
+        ret.scopes.push(...d[3].map(v => v[2]))
     }
     return ret
 } %}
@@ -499,11 +499,11 @@ expr_post_op -> %dot _ func_call {% d => {
         children:   [ d[2] ]
     }
 } %}
-expr_post_op -> %dot _ %identifier {% d => {
+expr_post_op -> %dot _ id {% d => {
     return {
         parse_type: "expr_post_op",
         sub_type:   "dot",
-        children:   [ token(d[2]) ]
+        children:   [ d[2] ]
     }
 } %}
 expr_post_op -> ( %increment | %decrement ) {% d => {
@@ -529,21 +529,21 @@ cast -> %kw_cast _ %larrow _ type _ %rarrow _ %lparen _ assign _ %rparen {% d =>
     }
 } %}
 
-func_call -> ( scope _ ):? %identifier ( _ templ_type_list ):? _ arg_list {% d => {
+func_call -> ( scope _ ):? id ( _ templ_type_list ):? _ arg_list {% d => {
     return {
         parse_type: "func_call",
         scope:      d[0] ? d[0][0] : null,
-        name:       token(d[1]),
+        name:       d[1],
         template:   d[2] ? d[2][1] : null,
         args:       d[4]
     }
 } %}
 
-var_access -> ( scope _ ):? %identifier {% d => {
+var_access -> ( scope _ ):? id {% d => {
     return {
         parse_type: "var_access",
         scope:      d[0] ? d[0][0] : null,
-        var:        token(d[1])
+        var:        d[1]
     }
 } %}
 
@@ -554,18 +554,18 @@ arg_list -> %lparen _ ( arg_list_inner _ ):? %rparen {% d => {
     }
 } %}
 
-arg_list_inner -> ( %identifier _ %colon _ ):? assign ( _ %comma _ ( %identifier _ %colon _ ):? assign ):* {% d => {
+arg_list_inner -> ( id _ %colon _ ):? assign ( _ %comma _ ( id _ %colon _ ):? assign ):* {% d => {
     ret = {
         parse_type: "arg_list_inner",
         children:   [ {
-            key:   d[0] ? token(d[0][0]) : null,
+            key:   d[0] ? d[0][0] : null,
             value: d[1]
         } ]
     }
     if (d[2]) {
         ret.children.push(...d[2].map(v => {
             return {
-                key:   v[3] ? token(v[3][0]) : null,
+                key:   v[3] ? v[3][0] : null,
                 value: v[4]
             }
         }))
@@ -650,6 +650,8 @@ assign_op -> (
     | %rshifteq
     | %rlogshifteq
 ) {% d => token(d[0][0]) %}
+
+id -> %identifier {% d => token(d[0]) %}
 
 literal -> number   {% id %}
 literal -> %string  {% d => { d[0].value = d[0].text.slice(1, -1); return token(d[0]) } %}
