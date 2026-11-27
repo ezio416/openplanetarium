@@ -1,3 +1,1 @@
-foreach (uint i, int j : null) {
-    ;
-}
+function ( a , b ) { }

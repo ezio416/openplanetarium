@@ -195,7 +195,7 @@ const lexer = moo.compile({
  # DATATYPE      -> ( %identifier | PRIMTYPE | %question | %kw_auto )
  # PRIMTYPE      -> %kw_void | %kw_int | %kw_int8 | %kw_int16 | %kw_int32 | %kw_int64 | %kw_uint | %kw_uint8 | %kw_uint16 | %kw_uint32 | %kw_uint64 | %kw_float | %kw_double | %kw_bool
  # FUNCATTR      -> ( %kw_override | %kw_final | %kw_explicit | %kw_property | %kw_delete ):*
-# STATEMENT     -> ( IF | FOR | FOREACH | WHILE | RETURN | STATBLOCK | BREAK | CONTINUE | DOWHILE | SWITCH | EXPRSTAT | TRY )
+ # STATEMENT     -> ( IF | FOR | FOREACH | WHILE | RETURN | STATBLOCK | BREAK | CONTINUE | DOWHILE | SWITCH | EXPRSTAT | TRY )
  # EXPRSTAT      -> ASSIGN:? %semi
  # SWITCH        -> %kw_switch %lparen ASSIGN %rparen %lbrace CASE:* %rbrace
  # IF            -> %kw_if %lparen ASSIGN %rparen STATEMENT ( %kw_else STATEMENT ):?
@@ -216,7 +216,7 @@ const lexer = moo.compile({
  # EXPRPOSTOP    -> ( %dot ( FUNCCALL | %identifier ) ) | ( %lbrace ( %identifier %colon ):? ASSIGN ( %comma ( %identifier %colon ):? ASSIGN ):* %rbrace ) | ARGLIST | %increment | %decrement
  # CAST          -> %kw_cast %larrow TYPE %rarrow %lparen ASSIGN %rparen
  # LITERAL       -> number | %string | boolean | %kw_null
-# LAMBDA        -> %kw_function %lparen ( ( TYPE TYPEMOD ):? %identifier:? ( %comma ( TYPE TYPEMOD ):? %identifier:? ):* ):? %rparen STATBLOCK
+ # LAMBDA        -> %kw_function %lparen ( ( TYPE TYPEMOD ):? %identifier:? ( %comma ( TYPE TYPEMOD ):? %identifier:? ):* ):? %rparen STATBLOCK
  # FUNCCALL      -> SCOPE %identifier TEMPLTYPELIST:? ARGLIST
  # VARACCESS     -> SCOPE %identifier
  # ARGLIST       -> %lparen ( %identifier %colon ):? ASSIGN ( %comma ( %identifier %colon ):? ASSIGN ):* %rparen
@@ -251,7 +251,7 @@ script -> _ ( ( test | import | typedef | funcdef | namespace | using | %semi ) 
     }
 } %}
 
-test -> statement {% id %}
+test -> lambda {% id %}
 
 import -> %kw_import _ type _ ( %amp _ ):? id _ param_list _ ( func_attr _ ):? %kw_from _ %string _ %semi {% d => {
     return {
@@ -687,6 +687,30 @@ cast -> %kw_cast _ %larrow _ type _ %rarrow _ %lparen _ assign _ %rparen {% d =>
         parse_type: "cast",
         type:       d[4],
         expr:       d[10]
+    }
+} %}
+
+lambda -> %kw_function _ %lparen _ ( lambda_item _ ( %comma _ lambda_item _ ):* ):? %rparen _ stat_block {% d => {
+    ret = {
+        parse_type: "lambda",
+        children:   [],
+        stmt:       d[7]
+    }
+    if (d[4]) {
+        ret.children.push(d[4][0])
+        if (d[4][2]) {
+            ret.children.push(...d[4][2].map(v => v[2]))
+        }
+    }
+    return ret
+} %}
+
+lambda_item -> ( type _ type_mod _ ):? id:? {% d => {
+    return {
+        parse_type: "lambda_item",
+        type:       d[0] ? d[0][0] : null,
+        type_mod:   d[0] ? d[0][2] : null,
+        id:         d[1] ??          null
     }
 } %}
 
