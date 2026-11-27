@@ -1,1 +1,1 @@
-private int[] i = { 1, 2 }, j;
+1;

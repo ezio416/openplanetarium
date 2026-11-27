@@ -251,7 +251,7 @@ script -> _ ( ( test | import | typedef | funcdef | namespace | using | %semi ) 
     }
 } %}
 
-test -> var {% id %}
+test -> statement {% id %}
 
 import -> %kw_import _ type _ ( %amp _ ):? id _ param_list _ ( func_attr _ ):? %kw_from _ %string _ %semi {% d => {
     return {
@@ -494,6 +494,21 @@ func_attr_kw -> (
     | %kw_delete
 ) {% d => token(d[0][0]) %}
 
+statement -> (
+    # | IF
+    # | FOR
+    # | FOREACH
+    # | WHILE
+    return
+    # | STATBLOCK
+    | break
+    | continue
+    # | DOWHILE
+    # | SWITCH
+    | expr_stat
+    # | TRY
+) {% d => d[0][0] %}
+
 expr_stat -> ( assign _ ):? %semi {% d => {
     return {
         parse_type: "expr_stat",
@@ -642,7 +657,7 @@ condition -> expr ( _ %question _ assign _ %colon _ assign ):? {% d => {
     }
 } %}
 
-expr_op -> (
+expr_op -> (  # TODO op order
     math_op
     | comp_op
     | logic_op
