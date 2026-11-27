@@ -216,7 +216,7 @@ const lexer = moo.compile({
 # CAST          -> %kw_cast %larrow TYPE %rarrow %lparen ASSIGN %rparen
  # LITERAL       -> number | %string | boolean | %kw_null
 # LAMBDA        -> %kw_function %lparen ( ( TYPE TYPEMOD ):? %identifier:? ( %comma ( TYPE TYPEMOD ):? %identifier:? ):* ):? %rparen STATBLOCK
-# FUNCCALL      -> SCOPE %identifier TEMPLTYPELIST:? ARGLIST
+ # FUNCCALL      -> SCOPE %identifier TEMPLTYPELIST:? ARGLIST
  # VARACCESS     -> SCOPE %identifier
  # ARGLIST       -> %lparen ( %identifier %colon ):? ASSIGN ( %comma ( %identifier %colon ):? ASSIGN ):* %rparen
  # ASSIGN        -> CONDITION ( ASSIGNOP ASSIGN ):?
@@ -258,7 +258,7 @@ script -> _ ( ( test | typedef | namespace | using | %semi ) _ ):* {% d => {
     }
 } %}
 
-test -> construct_call _ %semi {% id %}
+test -> func_call _ %semi {% id %}
 
 using -> %kw_using _ %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ %semi {% d => {
     ret = {
@@ -411,6 +411,16 @@ expr_pre_op -> (
     | %tilde
     | %at
 ) {% d => token(d[0][0]) %}
+
+func_call -> ( scope _ ):? %identifier ( _ templ_type_list ):? _ arg_list {% d => {
+    return {
+        parse_type: "func_call",
+        scope:      d[0] ? d[0][0] : null,
+        name:       token(d[1]),
+        held:       d[2] ? d[2][1] : null,
+        args:       d[4]
+    }
+} %}
 
 var_access -> scope _ %identifier {% d => {
     return {
