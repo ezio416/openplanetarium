@@ -184,7 +184,7 @@ const lexer = moo.compile({
 # CLASS         -> ( %kw_shared | %kw_abstract | %kw_final | %kw_external ):* %kw_class %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | FUNC | VAR | FUNCDEF ):* %rbrace ) )
 # VAR           -> ( %kw_private | %kw_protected ):? TYPE %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ( %comma %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ):* %semi
  # TYPEDEF       -> %kw_typedef PRIMTYPE %identifier %semi
-# INTFMTHD      -> TYPE %amp:? %identifier PARAMLIST %kw_const:? %semi
+ # INTFMTHD      -> TYPE %amp:? %identifier PARAMLIST %kw_const:? %semi
 # STATBLOCK     -> %lbrace ( VAR | STATEMENT | USING ):* %rbrace
  # PARAMLIST     -> %lparen ( %kw_void | ( TYPE TYPEMOD ( %ellipses | %identifier:? ( %assign EXPR ):? ) ( %comma TYPE TYPEMOD ( %ellipses | %identifier:? ( %assign EXPR ):? ) ):* ) ):? %rparen
  # TYPEMOD       -> ( %amp ( %kw_in | %kw_out | %kw_inout ):? ):?
@@ -251,7 +251,7 @@ script -> _ ( ( test | typedef | namespace | using | %semi ) _ ):* {% d => {
     }
 } %}
 
-test -> param_list {% id %}
+test -> interface_method {% id %}
 
 using -> %kw_using _ %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ %semi {% d => {
     ret = {
@@ -281,6 +281,17 @@ typedef -> %kw_typedef _ prim_type _ %identifier _ %semi {% d => {
         parse_type: "typedef",
         old:        token(d[2]),
         new:        token(d[4])
+    }
+} %}
+
+interface_method -> type _ ( %amp _ ):? %identifier _ param_list _ ( %kw_const _ ):? %semi {% d => {
+    return {
+        parse_type: "interface_method",
+        type:       d[0],
+        ref:        !!d[2],
+        name:       token(d[3]),
+        params:     d[5],
+        const:      !!d[7]
     }
 } %}
 
