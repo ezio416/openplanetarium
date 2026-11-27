@@ -182,7 +182,7 @@ const lexer = moo.compile({
 # INTERFACE     -> ( %kw_external | %kw_shared ):* %kw_interface %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | INTFMTHD ):* %rbrace ) )
 # MIXIN         -> %kw_mixin CLASS
 # CLASS         -> ( %kw_shared | %kw_abstract | %kw_final | %kw_external ):* %kw_class %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | FUNC | VAR | FUNCDEF ):* %rbrace ) )
-# VAR           -> ( %kw_private | %kw_protected ):? TYPE %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ( %comma %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ):* %semi
+ # VAR           -> ( %kw_private | %kw_protected ):? TYPE %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ( %comma %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ):* %semi
  # TYPEDEF       -> %kw_typedef PRIMTYPE %identifier %semi
  # INTFMTHD      -> TYPE %amp:? %identifier PARAMLIST %kw_const:? %semi
 # STATBLOCK     -> %lbrace ( VAR | STATEMENT | USING ):* %rbrace
@@ -251,7 +251,7 @@ script -> _ ( ( test | import | typedef | funcdef | namespace | using | %semi ) 
     }
 } %}
 
-test -> arg_list {% id %}
+test -> var {% id %}
 
 import -> %kw_import _ type _ ( %amp _ ):? id _ param_list _ ( func_attr _ ):? %kw_from _ %string _ %semi {% d => {
     return {
@@ -297,6 +297,35 @@ funcdef -> ( ( %kw_external | %kw_shared ) _ ):* %kw_funcdef _ type _ ( %amp _ )
         name:       d[6],
         params:     d[8]
     }
+} %}
+
+var -> ( ( %kw_private | %kw_protected ) _ ):? type _ var_assign _ ( %comma _ var_assign _ ):* %semi {% d => {
+    ret = {
+        parse_type: "var",
+        mod:        d[0] ? d[0][0][0] : null,
+        type:       d[1],
+        children:   [ d[3] ]
+    }
+    if (d[5]) {
+        ret.children.push(...d[5].map(v => v[2]))
+    }
+    return ret
+} %}
+
+var_assign -> id ( _ ( ( %assign _ ( init_list | expr ) ) | arg_list ) ):? {% d => {
+    ret = {
+        parse_type: "var_assign",
+        key:        d[0],
+        value:      null
+    }
+    if (d[1]) {
+        if (Array.isArray(d[1][1][0])) {
+            ret.value = d[1][1][0][2][0]
+        } else {
+            ret.value = d[1][1][0]
+        }
+    }
+    return ret
 } %}
 
 typedef -> %kw_typedef _ prim_type _ id _ %semi {% d => {

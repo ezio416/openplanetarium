@@ -1,1 +1,1 @@
-import void foo(int i) from "bar";
+private int[] i = { 1, 2 }, j;
