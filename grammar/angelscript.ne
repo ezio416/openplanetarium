@@ -193,7 +193,7 @@ const lexer = moo.compile({
  # SCOPE         -> %scope:? ( %identifier %scope ):* ( %identifier TEMPLTYPELIST:? %scope ):?
  # DATATYPE      -> ( %identifier | PRIMTYPE | %question | %kw_auto )
  # PRIMTYPE      -> %kw_void | %kw_int | %kw_int8 | %kw_int16 | %kw_int32 | %kw_int64 | %kw_uint | %kw_uint8 | %kw_uint16 | %kw_uint32 | %kw_uint64 | %kw_float | %kw_double | %kw_bool
-# FUNCATTR      -> ( %kw_override | %kw_final | %kw_explicit | %kw_property | %kw_delete ):*
+ # FUNCATTR      -> ( %kw_override | %kw_final | %kw_explicit | %kw_property | %kw_delete ):*
 # STATEMENT     -> ( IF | FOR | FOREACH | WHILE | RETURN | STATBLOCK | BREAK | CONTINUE | DOWHILE | SWITCH | EXPRSTAT | TRY )
 # EXPRSTAT      -> ASSIGN:? %semi
 # SWITCH        -> %kw_switch %lparen ASSIGN %rparen %lbrace CASE:* %rbrace
@@ -261,17 +261,17 @@ script -> _ ( ( test | typedef | using ) _ ):* {% d => {
     }
 } %}
 
-test -> math_op {% id %}
+test -> func_attr _ %semi {% id %}
 
 using -> %kw_using _ %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ %semi {% d => {
-    ret = [ token(d[4]) ]
-    if (d[5]) {
-        ret.push(...d[5].map(v => token(v[3])))
-    }
-    return {
+    ret = {
         parse_type: "using",
-        ids:        ret
+        ids:        [ token(d[4]) ]
     }
+    if (d[5]) {
+        ret.ids.push(...d[5].map(v => token(v[3])))
+    }
+    return ret
 } %}
 
 typedef -> %kw_typedef _ prim_type _ %identifier _ %semi {% d => {
@@ -283,14 +283,14 @@ typedef -> %kw_typedef _ prim_type _ %identifier _ %semi {% d => {
 } %}
 
 type_mod -> %amp ( _ ( %kw_in | %kw_out | %kw_inout ) ):? {% d => {
-    ret = [ token(d[0]) ]
-    if (d.length > 1 && d[1]) {
-        ret.push(token(d[1][1][0]))
-    }
-    return {
+    ret = {
         parse_type: "type_mod",
-        parts:      ret
+        parts:      [ token(d[0]) ]
     }
+    if (d.length > 1 && d[1]) {
+        ret.parts.push(token(d[1][1][0]))
+    }
+    return ret
 } %}
 
 type -> ( %kw_const _ ):? ( scope _ ):? data_type ( _ templ_type_list ):? ( _ %lbracket ( _ %rbracket ) | _ %at ( _ %kw_const ):? ):* {% d => {
@@ -308,14 +308,14 @@ type -> ( %kw_const _ ):? ( scope _ ):? data_type ( _ templ_type_list ):? ( _ %l
 } %}
 
 templ_type_list -> %larrow _ type ( _ %comma _ type ):* _ %rarrow {% d => {
-    ret = [ d[2] ]
-    if (d[3]) {
-        ret.push(...d[3].map(v => v[3]))
-    }
-    return {
+    ret = {
         parse_type: "templ_type_list",
-        types:      ret
+        types:      [ d[2] ]
     }
+    if (d[3]) {
+        ret.types.push(...d[3].map(v => v[3]))
+    }
+    return ret
 } %}
 
 scope -> ( %scope _ ):? %identifier _ ( %scope _ %identifier _ ):* ( templ_type_list _ ):? %scope {% d => {
@@ -356,6 +356,25 @@ prim_type -> (
     | %kw_float
     | %kw_double
     | %kw_bool
+) {% d => token(d[0][0]) %}
+
+func_attr -> func_attr_kw ( _ func_attr_kw ):* {% d => {
+    ret = {
+        parse_type: "func_attr",
+        attrs:      [ d[0] ]
+    }
+    if (d[1]) {
+        ret.attrs.push(...d[1].map(v => v[1]))
+    }
+    return ret
+} %}
+
+func_attr_kw -> (
+    %kw_override
+    | %kw_final
+    | %kw_explicit
+    | %kw_property
+    | %kw_delete
 ) {% d => token(d[0][0]) %}
 
 break -> %kw_break _ %semi {% d => token(d[0]) %}

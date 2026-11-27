@@ -1,1 +1,1 @@
-using namespace A::B;
+override final;
