@@ -1,1 +1,1 @@
-shared external funcdef float & f ( double d ) ;
+import void foo(int i) from "bar";
