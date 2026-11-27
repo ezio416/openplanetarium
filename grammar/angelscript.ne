@@ -210,7 +210,7 @@ const lexer = moo.compile({
 # CASE          -> ( ( %kw_case EXPR ) | %kw_default ) %colon STATEMENT:*
 # EXPRTERM      -> ( ( TYPE %assign ):? INITLIST ) | ( EXPRPREOP:* EXPRVALUE EXPRPOSTOP:* )
 # EXPRVALUE     -> %kw_void | CONSTRUCTCALL | FUNCCALL | VARACCESS | CAST | LITERAL | %lparen ASSIGN %rparen | LAMBDA
-# CONSTRUCTCALL -> TYPE ARGLIST
+ # CONSTRUCTCALL -> TYPE ARGLIST
  # EXPRPREOP     -> %dash | %plus | %bang | %increment | %decrement | %tilde | %at
 # EXPRPOSTOP    -> ( %dot ( FUNCCALL | %identifier ) ) | ( %lbrace ( %identifier %colon ):? ASSIGN ( %comma ( %identifier %colon ):? ASSIGN ):* %rbrace ) | ARGLIST | %increment | %decrement
 # CAST          -> %kw_cast %larrow TYPE %rarrow %lparen ASSIGN %rparen
@@ -258,7 +258,7 @@ script -> _ ( ( test | typedef | namespace | using | %semi ) _ ):* {% d => {
     }
 } %}
 
-test -> arg_list _ %semi {% id %}
+test -> construct_call _ %semi {% id %}
 
 using -> %kw_using _ %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ %semi {% d => {
     ret = {
@@ -362,7 +362,7 @@ prim_type -> (
     | %kw_float
     | %kw_double
     | %kw_bool
-) {% d => token(d[0][0]) %}
+) {% d => d[0][0] %}
 
 func_attr -> func_attr_kw ( _ func_attr_kw ):* {% d => {
     ret = {
@@ -391,6 +391,14 @@ expr -> literal {% d => {  // TODO temporary
     return {
         parse_type: "expr",
         expr:       d[0]
+    }
+} %}
+
+construct_call -> type _ arg_list {% d => {
+    return {
+        parse_type: "construct_call",
+        type:       d[0],
+        args:       d[2]
     }
 } %}
 
