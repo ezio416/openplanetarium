@@ -251,7 +251,7 @@ function token(d) {
 
 %}
 
-script -> _ ( ( test | typedef | namespace | using ) _ ):* {% d => {
+script -> _ ( ( test | typedef | namespace | using | %semi ) _ ):* {% d => {
     return {
         parse_type: "script",
         script:     d[1].map(v => v[0])
