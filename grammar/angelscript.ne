@@ -195,7 +195,7 @@ const lexer = moo.compile({
  # PRIMTYPE      -> %kw_void | %kw_int | %kw_int8 | %kw_int16 | %kw_int32 | %kw_int64 | %kw_uint | %kw_uint8 | %kw_uint16 | %kw_uint32 | %kw_uint64 | %kw_float | %kw_double | %kw_bool
  # FUNCATTR      -> ( %kw_override | %kw_final | %kw_explicit | %kw_property | %kw_delete ):*
 # STATEMENT     -> ( IF | FOR | FOREACH | WHILE | RETURN | STATBLOCK | BREAK | CONTINUE | DOWHILE | SWITCH | EXPRSTAT | TRY )
-# EXPRSTAT      -> ASSIGN:? %semi
+ # EXPRSTAT      -> ASSIGN:? %semi
 # SWITCH        -> %kw_switch %lparen ASSIGN %rparen %lbrace CASE:* %rbrace
 # IF            -> %kw_if %lparen ASSIGN %rparen STATEMENT ( %kw_else STATEMENT ):?
 # TRY           -> %kw_try STATBLOCK %kw_catch STATBLOCK
@@ -258,7 +258,7 @@ script -> _ ( ( test | typedef | namespace | using | %semi ) _ ):* {% d => {
     }
 } %}
 
-test -> cast _ %semi {% id %}
+test -> expr_stat {% id %}
 
 using -> %kw_using _ %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ %semi {% d => {
     ret = {
@@ -382,6 +382,13 @@ func_attr_kw -> (
     | %kw_property
     | %kw_delete
 ) {% d => token(d[0][0]) %}
+
+expr_stat -> ( assign _ ):? %semi {% d => {
+    return {
+        parse_type: "expr_stat",
+        assign:     d[0] ? d[0][0] : null
+    }
+} %}
 
 break -> %kw_break _ %semi {% d => token(d[0]) %}
 
