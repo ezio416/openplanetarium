@@ -185,7 +185,7 @@ const lexer = moo.compile({
  # TYPEDEF       -> %kw_typedef PRIMTYPE %identifier %semi
 # INTFMTHD      -> TYPE %amp:? %identifier PARAMLIST %kw_const:? %semi
 # STATBLOCK     -> %lbrace ( VAR | STATEMENT | USING ):* %rbrace
-# PARAMLIST     -> %lparen ( %kw_void | ( TYPE TYPEMOD ( %ellipses | %identifier:? ( %assign EXPR ):? ) ( %comma TYPE TYPEMOD ( %ellipses | %identifier:? ( %assign EXPR ):? ) ):* ) ):? %rparen
+ # PARAMLIST     -> %lparen ( %kw_void | ( TYPE TYPEMOD ( %ellipses | %identifier:? ( %assign EXPR ):? ) ( %comma TYPE TYPEMOD ( %ellipses | %identifier:? ( %assign EXPR ):? ) ):* ) ):? %rparen
  # TYPEMOD       -> ( %amp ( %kw_in | %kw_out | %kw_inout ):? ):?
  # TYPE          -> %kw_const:? SCOPE DATATYPE TEMPLTYPELIST:? ( ( %lbrace %rbrace ) | ( %at %kw_const:? ) ):*
  # TEMPLTYPELIST -> %larrow TYPE ( %comma TYPE ):* %rarrow
@@ -228,14 +228,6 @@ const lexer = moo.compile({
  # BITOP         -> %amp | %bar | %carrot | %lshift | %rshift | %rlogshift
  # ASSIGNOP      -> %assign | %pluseq | %minuseq | %timeseq | %diveq | %oreq | %andeq | %xoreq | %modeq | %poweq | %lshifteq | %rshifteq | %rlogshifteq
 
-# program -> ( _ statement ):+ _ {% d => d[0].map(v => v[1]).filter(s => s !== null) %}
-
-# statement -> expression:? _ %semi {% d => d[0] %}
-# statement -> %lbrace _ statement _ %rbrace {% d => d[2] %}
-
-# expression -> constant {% id %}
-# expression -> %lparen _ expression _ %rparen {% d => d[2] %}
-
 @{%
 
 function token(d) {
@@ -258,7 +250,7 @@ script -> _ ( ( test | typedef | namespace | using | %semi ) _ ):* {% d => {
     }
 } %}
 
-test -> expr_post_op {% id %}
+test -> param_list {% id %}
 
 using -> %kw_using _ %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ %semi {% d => {
     ret = {
@@ -288,6 +280,42 @@ typedef -> %kw_typedef _ prim_type _ %identifier _ %semi {% d => {
         parse_type: "typedef",
         old:        d[2],
         new:        token(d[4])
+    }
+} %}
+
+param_list -> %lparen _ ( ( %kw_void | param_list_inner ) _ ):? %rparen {% d => {
+    ret = {
+        parse_type: "param_list",
+        children:   []
+    }
+    if (d[2]) {
+        if (d[2][0][0].hasOwnProperty("children")) {
+            ret.children = d[2][0][0].children
+        } else {
+            ret.children.push(token(d[2][0][0]))
+        }
+    }
+    return ret
+} %}
+
+param_list_inner -> param_list_item ( _ %comma _ param_list_item ):* {% d => {
+    ret = {
+        parse_type: "param_list_inner",
+        children:   [ d[0] ]
+    }
+    if (d[1]) {
+        ret.children.push(...d[1].map(v => v[3]))
+    }
+    return ret
+} %}
+
+param_list_item -> type ( _ type_mod ):? _ ( %ellipses | %identifier ( _ %assign _ expr ):? ) {% d => {
+    return {
+        parse_type: "param_list_item",
+        type:       d[0],
+        type_mod:   d[1] ? d[1][1] : null,
+        key:        token(d[3][0]),
+        value:      d[3] && d[3].length === 2 && d[3][1] ? d[3][1][3] : null
     }
 } %}
 
