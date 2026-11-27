@@ -53,7 +53,7 @@ repository:
       - name: keyword.operator.increment.angelscript
         match: \+\+
       - name: keyword.operator.logical.angelscript
-        match: \b(and|or|xor)\b|(&&|\|\||!|\^)
+        match: \b(and|not|or|xor)\b|(&&|!|\|\||\^)
       - begin: (\?)
         beginCaptures:
           1:

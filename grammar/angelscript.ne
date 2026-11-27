@@ -53,6 +53,7 @@ const lexer = moo.compile({
             kw_is:         "is",
             kw_mixin:      "mixin",
             kw_namespace:  "namespace",
+            kw_not:        "not",
             kw_null:       "null",
             kw_or:         "or",
             kw_out:        "out",
