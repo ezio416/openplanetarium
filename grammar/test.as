@@ -1,1 +1,1 @@
-Math::PI;
+using namespace A::B;

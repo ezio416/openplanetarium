@@ -172,7 +172,7 @@ const lexer = moo.compile({
 
 # SCRIPT        -> ( IMPORT | ENUM | TYPEDEF | CLASS | MIXIN | INTERFACE | FUNCDEF | VIRTPROP | VAR | FUNC | NAMESPACE | USING | %semi ):*
 # IMPORT        -> %kw_import TYPE %amp:? %identifier PARAMLIST FUNCATTR %kw_from %string %semi
-# USING         -> %kw_using %kw_namespace %identifier ( %scope %identifier ):* %semi
+ # USING         -> %kw_using %kw_namespace %identifier ( %scope %identifier ):* %semi
 # NAMESPACE     -> %kw_namespace %identifier ( %scope %identifier ):* %lbrace SCRIPT %rbrace
 # ENUM          -> ( %kw_shared | %kw_external ):* %kw_enum %identifier ( %colon ( %kw_int | %kw_int8 | %kw_int16 | %kw_int32 | %kw_int64 | %kw_uint | %kw_uint8 | %kw_uint16 | %kw_uint32 | %kw_uint64 ) ):? ( %semi | ( %lbrace %identifier ( %assign EXPR ):? ( %comma %identifier ( %assign EXPR ):? ):* %rbrace ) )
 # FUNCDEF       -> ( %kw_external | %kw_shared ):* %kw_funcdef TYPE %amp:? %identifier PARAMLIST %semi
@@ -261,7 +261,18 @@ script -> _ ( ( test | typedef ) _ ):* {% d => {
     }
 } %}
 
-test -> var_access _ %semi {% id %}
+test -> using {% id %}
+
+using -> %kw_using _ %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ %semi {% d => {
+    ret = [ token(d[4]) ]
+    if (d[5]) {
+        ret.push(...d[5].map(v => token(v[3])))
+    }
+    return {
+        parse_type: 'using',
+        ids:        ret
+    }
+} %}
 
 typedef -> %kw_typedef _ prim_type _ %identifier _ %semi {% d => {
     return {
