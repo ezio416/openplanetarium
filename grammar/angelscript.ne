@@ -208,7 +208,7 @@ const lexer = moo.compile({
  # BREAK         -> %kw_break %semi
  # CONTINUE      -> %kw_continue %semi
 # EXPR          -> EXPRTERM ( EXPROP EXPRTERM ):*
-# CASE          -> ( ( %kw_case EXPR ) | %kw_default ) %colon STATEMENT:*
+ # CASE          -> ( ( %kw_case EXPR ) | %kw_default ) %colon STATEMENT:*
 # EXPRTERM      -> ( ( TYPE %assign ):? INITLIST ) | ( EXPRPREOP:* EXPRVALUE EXPRPOSTOP:* )
 # EXPRVALUE     -> %kw_void | CONSTRUCTCALL | FUNCCALL | VARACCESS | CAST | LITERAL | %lparen ASSIGN %rparen | LAMBDA
  # CONSTRUCTCALL -> TYPE ARGLIST
@@ -251,7 +251,7 @@ script -> _ ( ( test | import | typedef | funcdef | namespace | using | %semi ) 
     }
 } %}
 
-test -> statement {% id %}
+test -> case {% id %}
 
 import -> %kw_import _ type _ ( %amp _ ):? id _ param_list _ ( func_attr _ ):? %kw_from _ %string _ %semi {% d => {
     return {
@@ -531,6 +531,14 @@ expr -> literal {% d => {  // TODO temporary
     return {
         parse_type: "expr",
         expr:       d[0]
+    }
+} %}
+
+case -> ( %kw_case _ expr | %kw_default ) _ %colon ( _ statement ):* {% d => {
+    return {
+        parse_type: "case",
+        label:      d[0],
+        children:   d[3] ? d[3].map(v => v[1]) : []
     }
 } %}
 
