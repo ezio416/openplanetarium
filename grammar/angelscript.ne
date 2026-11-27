@@ -201,7 +201,7 @@ const lexer = moo.compile({
  # IF            -> %kw_if %lparen ASSIGN %rparen STATEMENT ( %kw_else STATEMENT ):?
  # TRY           -> %kw_try STATBLOCK %kw_catch STATBLOCK
  # FOR           -> %kw_for %lparen ( VAR | EXPRSTAT ) EXPRSTAT ( ASSIGN ( %comma ASSIGN ):* ):? %rparen STATEMENT
-# FOREACH       -> %kw_foreach %lparen TYPE %identifier ( %comma TYPE %identifier ):* %colon ASSIGN %rparen STATEMENT
+ # FOREACH       -> %kw_foreach %lparen TYPE %identifier ( %comma TYPE %identifier ):* %colon ASSIGN %rparen STATEMENT
  # WHILE         -> %kw_while %lparen ASSIGN %rparen STATEMENT
  # DOWHILE       -> %kw_do STATEMENT %kw_while %lparen ASSIGN %rparen %semi
  # RETURN        -> %kw_return ASSIGN:? %semi
@@ -504,7 +504,7 @@ func_attr_kw -> (
 statement -> (
     if
     | for
-    # | FOREACH
+    | foreach
     | while
     | return
     | stat_block
@@ -561,6 +561,27 @@ for -> %kw_for _ %lparen _ ( var | expr_stat ) _ expr_stat _ ( assign ( _ %comma
         if (d[8][1]) {
             ret.post.push(...d[8][1].map(v => v[3]))
         }
+    }
+    return ret
+} %}
+
+foreach -> %kw_foreach _ %lparen _ type _ id _ ( %comma _ type _ id _ ):* %colon _ assign _ %rparen _ statement {% d => {
+    ret = {
+        parse_type: "foreach",
+        vars:       [ [
+            d[4],
+            d[6]
+        ] ],
+        arr:        d[11],
+        stmt:       d[15]
+    }
+    if (d[8]) {
+        ret.vars.push(...d[8].map(v => {
+            return [
+                v[2],
+                v[4]
+            ]
+        }))
     }
     return ret
 } %}

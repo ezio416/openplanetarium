@@ -1,3 +1,3 @@
-for (uint i = 0; true; false) {
+foreach (uint i, int j : null) {
     ;
 }
