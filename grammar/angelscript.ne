@@ -238,10 +238,6 @@ const lexer = moo.compile({
 
 @{%
 
-function idd(d) {
-    return d[0][0]
-}
-
 function token(d) {
     return {
         token_type: d.type,
@@ -404,7 +400,7 @@ expr_op -> (
     | comp_op
     | logic_op
     | bit_op
-) {% idd %}
+) {% d => d[0][0] %}
 
 math_op -> (
     %plus
