@@ -200,7 +200,7 @@ const lexer = moo.compile({
  # SWITCH        -> %kw_switch %lparen ASSIGN %rparen %lbrace CASE:* %rbrace
  # IF            -> %kw_if %lparen ASSIGN %rparen STATEMENT ( %kw_else STATEMENT ):?
  # TRY           -> %kw_try STATBLOCK %kw_catch STATBLOCK
-# FOR           -> %kw_for %lparen ( VAR | EXPRSTAT ) EXPRSTAT ( ASSIGN ( %comma ASSIGN ):* ):? %rparen STATEMENT
+ # FOR           -> %kw_for %lparen ( VAR | EXPRSTAT ) EXPRSTAT ( ASSIGN ( %comma ASSIGN ):* ):? %rparen STATEMENT
 # FOREACH       -> %kw_foreach %lparen TYPE %identifier ( %comma TYPE %identifier ):* %colon ASSIGN %rparen STATEMENT
  # WHILE         -> %kw_while %lparen ASSIGN %rparen STATEMENT
  # DOWHILE       -> %kw_do STATEMENT %kw_while %lparen ASSIGN %rparen %semi
@@ -503,7 +503,7 @@ func_attr_kw -> (
 
 statement -> (
     if
-    # | FOR
+    | for
     # | FOREACH
     | while
     | return
@@ -546,6 +546,23 @@ try -> %kw_try _ stat_block _ %kw_catch _ stat_block {% d => {
         try:        d[2],
         catch:      d[6]
     }
+} %}
+
+for -> %kw_for _ %lparen _ ( var | expr_stat ) _ expr_stat _ ( assign ( _ %comma _ assign ):* _ ):? %rparen _ statement {% d => {
+    ret = {
+        parse_type: "for",
+        init:       d[4][0],
+        pre:        d[6],
+        post:       [],
+        stmt:       d[11]
+    }
+    if (d[8]) {
+        ret.post.push(d[8][0])
+        if (d[8][1]) {
+            ret.post.push(...d[8][1].map(v => v[3]))
+        }
+    }
+    return ret
 } %}
 
 while -> %kw_while _ %lparen _ assign _ %rparen _ statement {% d => {
