@@ -189,7 +189,7 @@ const lexer = moo.compile({
  # TYPEMOD       -> ( %amp ( %kw_in | %kw_out | %kw_inout ):? ):?
  # TYPE          -> %kw_const:? SCOPE DATATYPE TEMPLTYPELIST:? ( ( %lbrace %rbrace ) | ( %at %kw_const:? ) ):*
  # TEMPLTYPELIST -> %larrow TYPE ( %comma TYPE ):* %rarrow
-# INITLIST      -> %lbrace ( ASSIGN | INITLIST ):? ( %comma ( ASSIGN | INITLIST ):? ):* %rbrace
+ # INITLIST      -> %lbrace ( ASSIGN | INITLIST ):? ( %comma ( ASSIGN | INITLIST ):? ):* %rbrace
  # SCOPE         -> %scope:? ( %identifier %scope ):* ( %identifier TEMPLTYPELIST:? %scope ):?
  # DATATYPE      -> ( %identifier | PRIMTYPE | %question | %kw_auto )
  # PRIMTYPE      -> %kw_void | %kw_int | %kw_int8 | %kw_int16 | %kw_int32 | %kw_int64 | %kw_uint | %kw_uint8 | %kw_uint16 | %kw_uint32 | %kw_uint64 | %kw_float | %kw_double | %kw_bool
@@ -258,7 +258,7 @@ script -> _ ( ( test | typedef | namespace | using | %semi ) _ ):* {% d => {
     }
 } %}
 
-test -> expr_stat {% id %}
+test -> init_list {% id %}
 
 using -> %kw_using _ %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ %semi {% d => {
     ret = {
@@ -326,6 +326,25 @@ templ_type_list -> %larrow _ type ( _ %comma _ type ):* _ %rarrow {% d => {
     }
     return ret
 } %}
+
+init_list -> %lbrace _ ( ( init_list_item _ %comma _ ):* init_list_item _ ( %comma _ ):? ):? %rbrace {% d => {
+    ret = {
+        parse_type: "init_list",
+        elements:   []
+    }
+    if (d[2]) {
+        if (d[2][0]) {
+            ret.elements.push(...d[2][0].map(v => v[0]))
+        }
+        ret.elements.push(d[2][1])
+    }
+    return ret
+} %}
+
+init_list_item -> (
+    assign
+    | init_list
+) {% d => d[0][0] %}
 
 scope -> ( %scope _ ):? %identifier _ ( %scope _ %identifier _ ):* ( templ_type_list _ ):? %scope {% d => {
     ret = {
