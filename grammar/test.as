@@ -1,1 +1,1 @@
-typedef float f32;
+shared external funcdef float & f ( double d ) ;

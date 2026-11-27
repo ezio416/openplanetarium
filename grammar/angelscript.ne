@@ -176,7 +176,7 @@ const lexer = moo.compile({
  # USING         -> %kw_using %kw_namespace %identifier ( %scope %identifier ):* %semi
  # NAMESPACE     -> %kw_namespace %identifier ( %scope %identifier ):* %lbrace SCRIPT %rbrace
 # ENUM          -> ( %kw_shared | %kw_external ):* %kw_enum %identifier ( %colon ( %kw_int | %kw_int8 | %kw_int16 | %kw_int32 | %kw_int64 | %kw_uint | %kw_uint8 | %kw_uint16 | %kw_uint32 | %kw_uint64 ) ):? ( %semi | ( %lbrace %identifier ( %assign EXPR ):? ( %comma %identifier ( %assign EXPR ):? ):* %rbrace ) )
-# FUNCDEF       -> ( %kw_external | %kw_shared ):* %kw_funcdef TYPE %amp:? %identifier PARAMLIST %semi
+ # FUNCDEF       -> ( %kw_external | %kw_shared ):* %kw_funcdef TYPE %amp:? %identifier PARAMLIST %semi
 # FUNC          -> ( %kw_shared | %kw_external ):* ( %kw_private | %kw_protected ):? ( ( ( TYPE %amp:? ) | %tilde ) ):? _ %identifier PARAMLIST _ %kw_const:? FUNCATTR ( %semi | STATBLOCK )
 # VIRTPROP      -> ( %kw_private | %kw_protected ):? TYPE %amp:? %identifier %lbrace ( ( %kw_get | %kw_set ) %kw_const:? FUNCATTR ( STATBLOCK | %semi ) ):* %rbrace
 # INTERFACE     -> ( %kw_external | %kw_shared ):* %kw_interface %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | INTFMTHD ):* %rbrace ) )
@@ -244,7 +244,7 @@ function token(d) {
 
 %}
 
-script -> _ ( ( test | typedef | namespace | using | %semi ) _ ):* {% d => {
+script -> _ ( ( test | typedef | funcdef | namespace | using | %semi ) _ ):* {% d => {
     return {
         parse_type: "script",
         children:   d[1].map(v => v[0][0])
@@ -274,6 +274,17 @@ namespace -> %kw_namespace _ id ( _ %scope _ id ):* _ %lbrace script %rbrace {% 
         ret.ids.push(...d[3].map(v => v[3]))
     }
     return ret
+} %}
+
+funcdef -> ( ( %kw_external | %kw_shared ) _ ):* %kw_funcdef _ type _ ( %amp _ ):? id _ param_list _ %semi {% d => {
+    return {
+        parse_type: "funcdef",
+        mods:       d[0] ? d[0].map(v => token(v[0][0])) : [],
+        type:       d[3],
+        ref:        !!d[5],
+        name:       d[6],
+        params:     d[8]
+    }
 } %}
 
 typedef -> %kw_typedef _ prim_type _ id _ %semi {% d => {
