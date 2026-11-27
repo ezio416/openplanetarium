@@ -210,7 +210,7 @@ const lexer = moo.compile({
 # EXPR          -> EXPRTERM ( EXPROP EXPRTERM ):*
  # CASE          -> ( ( %kw_case EXPR ) | %kw_default ) %colon STATEMENT:*
 # EXPRTERM      -> ( ( TYPE %assign ):? INITLIST ) | ( EXPRPREOP:* EXPRVALUE EXPRPOSTOP:* )
-# EXPRVALUE     -> %kw_void | CONSTRUCTCALL | FUNCCALL | VARACCESS | CAST | LITERAL | %lparen ASSIGN %rparen | LAMBDA
+ # EXPRVALUE     -> %kw_void | CONSTRUCTCALL | FUNCCALL | VARACCESS | CAST | LITERAL | %lparen ASSIGN %rparen | LAMBDA
  # CONSTRUCTCALL -> TYPE ARGLIST
  # EXPRPREOP     -> %dash | %plus | %bang | %increment | %decrement | %tilde | %at
  # EXPRPOSTOP    -> ( %dot ( FUNCCALL | %identifier ) ) | ( %lbrace ( %identifier %colon ):? ASSIGN ( %comma ( %identifier %colon ):? ASSIGN ):* %rbrace ) | ARGLIST | %increment | %decrement
@@ -251,7 +251,7 @@ script -> _ ( ( test | import | typedef | funcdef | namespace | using | %semi ) 
     }
 } %}
 
-test -> lambda {% id %}
+test -> expr_value {% id %}
 
 import -> %kw_import _ type _ ( %amp _ ):? id _ param_list _ ( func_attr _ ):? %kw_from _ %string _ %semi {% d => {
     return {
@@ -627,6 +627,17 @@ case -> ( %kw_case _ expr | %kw_default ) _ %colon ( _ statement ):* {% d => {
         children:   d[3] ? d[3].map(v => v[1]) : []
     }
 } %}
+
+expr_value -> %kw_void {% d => token(d[0]) %}
+expr_value -> %lparen _ assign _ %rparen {% d => d[2] %}
+expr_value -> (
+    construct_call
+    | func_call
+    | var_access
+    | cast
+    | literal
+    | lambda
+) {% d => d[0][0] %}
 
 construct_call -> type _ arg_list {% d => {
     return {
