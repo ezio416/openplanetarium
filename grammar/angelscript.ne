@@ -217,7 +217,7 @@ const lexer = moo.compile({
  # LITERAL       -> number | %string | boolean | %kw_null
 # LAMBDA        -> %kw_function %lparen ( ( TYPE TYPEMOD ):? %identifier:? ( %comma ( TYPE TYPEMOD ):? %identifier:? ):* ):? %rparen STATBLOCK
 # FUNCCALL      -> SCOPE %identifier TEMPLTYPELIST:? ARGLIST
-# VARACCESS     -> SCOPE %identifier
+ # VARACCESS     -> SCOPE %identifier
 # ARGLIST       -> %lparen ( %identifier %colon ):? ASSIGN ( %comma ( %identifier %colon ):? ASSIGN ):* %rparen
 # ASSIGN        -> CONDITION ( ASSIGNOP ASSIGN ):?
 # CONDITION     -> EXPR ( %question ASSIGN %colon ASSIGN ):?
@@ -261,7 +261,7 @@ script -> _ ( ( test | typedef ) _ ):* {% d => {
     }
 } %}
 
-test -> type _ %semi {% id %}
+test -> var_access _ %semi {% id %}
 
 typedef -> %kw_typedef _ prim_type _ %identifier _ %semi {% d => {
     return {
@@ -351,6 +351,13 @@ expr_pre_op -> (
     | %tilde
     | %at
 ) {% d => token(d[0][0]) %}
+
+var_access -> scope _ %identifier {% d => {
+    return {
+        scope: d[0],
+        var: token(d[2])
+    }
+} %}
 
 expr_op -> (
     math_op
