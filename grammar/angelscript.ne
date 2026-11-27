@@ -254,11 +254,11 @@ function token(d) {
 script -> _ ( ( test | typedef | namespace | using | %semi ) _ ):* {% d => {
     return {
         parse_type: "script",
-        script:     d[1].map(v => v[0])
+        script:     d[1].map(v => v[0][0])
     }
 } %}
 
-test -> func_attr _ %semi {% id %}
+test -> assign _ %semi {% id %}
 
 using -> %kw_using _ %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ %semi {% d => {
     ret = {
@@ -332,13 +332,10 @@ scope -> ( %scope _ ):? %identifier _ ( %scope _ %identifier _ ):* ( templ_type_
         parse_type: "scope",
         global:     !!d[0],
         scopes:     [ token(d[1]) ],
-        held:       []
+        held:       d[4] ? d[4][0] : []
     }
     if (d[3]) {
         ret.scopes.push(...d[3].map(v => token(v[2])))
-    }
-    if (d[4]) {
-        ret.held = d[4][0]
     }
     return ret
 } %}
@@ -390,6 +387,13 @@ break -> %kw_break _ %semi {% d => token(d[0]) %}
 
 continue -> %kw_continue _ %semi {% d => token(d[0]) %}
 
+expr -> literal {% d => {  // TODO temporary
+    return {
+        parse_type: "expr",
+        expr:       d[0]
+    }
+} %}
+
 expr_pre_op -> (
     %dash
     | %plus
@@ -405,6 +409,23 @@ var_access -> scope _ %identifier {% d => {
         parse_type: "var_access",
         scope:      d[0],
         var:        token(d[2])
+    }
+} %}
+
+assign -> condition ( _ assign_op _ assign ):? {% d => {
+    return {
+        parse_type: "assign",
+        condition:  d[0],
+        assign:     d[1] ? d[1][3] : null
+    }
+} %}
+
+condition -> expr ( _ %question _ assign _ %colon _ assign ):? {% d => {
+    return {
+        parse_type:   "condition",
+        expr:         d[0],
+        assign_true:  d[1] ? d[1][3] : null,
+        assign_false: d[1] ? d[1][7] : null
     }
 } %}
 
