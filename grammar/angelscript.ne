@@ -199,7 +199,7 @@ const lexer = moo.compile({
  # EXPRSTAT      -> ASSIGN:? %semi
  # SWITCH        -> %kw_switch %lparen ASSIGN %rparen %lbrace CASE:* %rbrace
  # IF            -> %kw_if %lparen ASSIGN %rparen STATEMENT ( %kw_else STATEMENT ):?
-# TRY           -> %kw_try STATBLOCK %kw_catch STATBLOCK
+ # TRY           -> %kw_try STATBLOCK %kw_catch STATBLOCK
 # FOR           -> %kw_for %lparen ( VAR | EXPRSTAT ) EXPRSTAT ( ASSIGN ( %comma ASSIGN ):* ):? %rparen STATEMENT
 # FOREACH       -> %kw_foreach %lparen TYPE %identifier ( %comma TYPE %identifier ):* %colon ASSIGN %rparen STATEMENT
  # WHILE         -> %kw_while %lparen ASSIGN %rparen STATEMENT
@@ -247,7 +247,7 @@ function token(d) {
 script -> _ ( ( test | import | typedef | funcdef | namespace | using | %semi ) _ ):* {% d => {
     return {
         parse_type: "script",
-        children:   d[1].map(v => v[0][0])
+        children:   d[1] ? d[1].map(v => v[0][0]) : []
     }
 } %}
 
@@ -393,10 +393,10 @@ param_list_item -> type ( _ type_mod ):? _ ( %ellipses | %identifier ( _ %assign
 type_mod -> %amp ( _ ( %kw_in | %kw_out | %kw_inout ) ):? {% d => {
     ret = {
         parse_type: "type_mod",
-        parts:      [ token(d[0]) ]
+        children:   [ token(d[0]) ]
     }
     if (d.length > 1 && d[1]) {
-        ret.parts.push(token(d[1][1][0]))
+        ret.children.push(token(d[1][1][0]))
     }
     return ret
 } %}
@@ -418,10 +418,10 @@ type -> ( %kw_const _ ):? ( scope _ ):? data_type ( _ templ_type_list ):? ( _ %l
 templ_type_list -> %larrow _ type ( _ %comma _ type ):* _ %rarrow {% d => {
     ret = {
         parse_type: "templ_type_list",
-        types:      [ d[2] ]
+        children:   [ d[2] ]
     }
     if (d[3]) {
-        ret.types.push(...d[3].map(v => v[3]))
+        ret.children.push(...d[3].map(v => v[3]))
     }
     return ret
 } %}
@@ -429,13 +429,13 @@ templ_type_list -> %larrow _ type ( _ %comma _ type ):* _ %rarrow {% d => {
 init_list -> %lbrace _ ( ( init_list_item _ %comma _ ):* init_list_item _ ( %comma _ ):? ):? %rbrace {% d => {
     ret = {
         parse_type: "init_list",
-        elements:   []
+        children:   []
     }
     if (d[2]) {
         if (d[2][0]) {
-            ret.elements.push(...d[2][0].map(v => v[0]))
+            ret.children.push(...d[2][0].map(v => v[0]))
         }
-        ret.elements.push(d[2][1])
+        ret.children.push(d[2][1])
     }
     return ret
 } %}
@@ -449,11 +449,11 @@ scope -> ( %scope _ ):? id _ ( %scope _ id _ ):* ( templ_type_list _ ):? %scope 
     ret = {
         parse_type: "scope",
         global:     !!d[0],
-        scopes:     [ d[1] ],
+        children:   [ d[1] ],
         template:   d[4] ? d[4][0] : []
     }
     if (d[3]) {
-        ret.scopes.push(...d[3].map(v => v[2]))
+        ret.children.push(...d[3].map(v => v[2]))
     }
     return ret
 } %}
@@ -485,10 +485,10 @@ prim_type -> (
 func_attr -> func_attr_kw ( _ func_attr_kw ):* {% d => {
     ret = {
         parse_type: "func_attr",
-        attrs:      [ d[0] ]
+        children:   [ d[0] ]
     }
     if (d[1]) {
-        ret.attrs.push(...d[1].map(v => v[1]))
+        ret.children.push(...d[1].map(v => v[1]))
     }
     return ret
 } %}
@@ -513,20 +513,20 @@ statement -> (
     | do_while
     | switch
     | expr_stat
-    # | TRY
+    | try
 ) {% d => d[0][0] %}
 
 expr_stat -> ( assign _ ):? %semi {% d => {
     return {
         parse_type: "expr_stat",
-        assign:     d[0] ? d[0][0] : null
+        expr:       d[0] ? d[0][0] : null
     }
 } %}
 
 switch -> %kw_switch _ %lparen _ assign _ %rparen _ %lbrace _ ( case _ ):* %rbrace {% d => {
     return {
         parse_type: "switch",
-        assign:     d[4],
+        switch:     d[4],
         children:   d[10] ? d[10].map(v => v[0]) : []
     }
 } %}
@@ -534,16 +534,24 @@ switch -> %kw_switch _ %lparen _ assign _ %rparen _ %lbrace _ ( case _ ):* %rbra
 if -> %kw_if _ %lparen _ assign _ %rparen _ statement ( _ %kw_else _ statement ):? {% d => {
     return {
         parse_type: "if",
-        cond:       d[4],
+        if:         d[4],
         stmt:       d[8],
         else:       d[9] ? d[9][3] : null
+    }
+} %}
+
+try -> %kw_try _ stat_block _ %kw_catch _ stat_block {% d => {
+    return {
+        parse_type: "try",
+        try:        d[2],
+        catch:      d[6]
     }
 } %}
 
 while -> %kw_while _ %lparen _ assign _ %rparen _ statement {% d => {
     return {
         parse_type: "while",
-        cond:       d[4],
+        while:      d[4],
         stmt:       d[8]
     }
 } %}
@@ -559,7 +567,7 @@ do_while -> %kw_do _ statement _ %kw_while _ %lparen _ assign _ %rparen _ %semi 
 return -> %kw_return _ ( assign _ ):? %semi {% d => {
     return {
         parse_type: "return",
-        assign:     d[2] ? d[2][0] : null
+        return:     d[2] ? d[2][0] : null
     }
 } %}
 
@@ -586,7 +594,7 @@ construct_call -> type _ arg_list {% d => {
     return {
         parse_type: "construct_call",
         type:       d[0],
-        args:       d[2]
+        children:   d[2]
     }
 } %}
 
@@ -640,7 +648,7 @@ cast -> %kw_cast _ %larrow _ type _ %rarrow _ %lparen _ assign _ %rparen {% d =>
     return {
         parse_type: "cast",
         type:       d[4],
-        assign:     d[10]
+        expr:       d[10]
     }
 } %}
 

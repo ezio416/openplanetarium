@@ -1,5 +1,5 @@
-if (true) {
+try {
     ;
-} else {
+} catch {
     ;
 }
