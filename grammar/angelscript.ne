@@ -185,7 +185,7 @@ const lexer = moo.compile({
  # VAR           -> ( %kw_private | %kw_protected ):? TYPE %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ( %comma %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ):* %semi
  # TYPEDEF       -> %kw_typedef PRIMTYPE %identifier %semi
  # INTFMTHD      -> TYPE %amp:? %identifier PARAMLIST %kw_const:? %semi
-# STATBLOCK     -> %lbrace ( VAR | STATEMENT | USING ):* %rbrace
+ # STATBLOCK     -> %lbrace ( VAR | STATEMENT | USING ):* %rbrace
  # PARAMLIST     -> %lparen ( %kw_void | ( TYPE TYPEMOD ( %ellipses | %identifier:? ( %assign EXPR ):? ) ( %comma TYPE TYPEMOD ( %ellipses | %identifier:? ( %assign EXPR ):? ) ):* ) ):? %rparen
  # TYPEMOD       -> ( %amp ( %kw_in | %kw_out | %kw_inout ):? ):?
  # TYPE          -> %kw_const:? SCOPE DATATYPE TEMPLTYPELIST:? ( ( %lbrace %rbrace ) | ( %at %kw_const:? ) ):*
@@ -347,6 +347,13 @@ interface_method -> type _ ( %amp _ ):? id _ param_list _ ( %kw_const _ ):? %sem
     }
 } %}
 
+stat_block -> %lbrace _ ( ( var | statement | using ) _ ):* %rbrace {% d => {
+    return {
+        parse_type: "stat_block",
+        children:   d[2] ? d[2].map(v => v[0][0]) : []
+    }
+} %}
+
 param_list -> %lparen _ ( ( %kw_void | param_list_inner ) _ ):? %rparen {% d => {
     ret = {
         parse_type: "param_list",
@@ -500,7 +507,7 @@ statement -> (
     # | FOREACH
     # | WHILE
     return
-    # | STATBLOCK
+    | stat_block
     | break
     | continue
     # | DOWHILE
