@@ -258,7 +258,7 @@ script -> _ ( ( test | typedef | namespace | using | %semi ) _ ):* {% d => {
     }
 } %}
 
-test -> func_call _ %semi {% id %}
+test -> var_access _ %semi {% id %}
 
 using -> %kw_using _ %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ %semi {% d => {
     ret = {
@@ -422,11 +422,11 @@ func_call -> ( scope _ ):? %identifier ( _ templ_type_list ):? _ arg_list {% d =
     }
 } %}
 
-var_access -> scope _ %identifier {% d => {
+var_access -> ( scope _ ):? %identifier {% d => {
     return {
         parse_type: "var_access",
-        scope:      d[0],
-        var:        token(d[2])
+        scope:      d[0] ? d[0][0] : null,
+        var:        token(d[1])
     }
 } %}
 
