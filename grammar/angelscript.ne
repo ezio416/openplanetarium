@@ -197,7 +197,7 @@ const lexer = moo.compile({
  # FUNCATTR      -> ( %kw_override | %kw_final | %kw_explicit | %kw_property | %kw_delete ):*
 # STATEMENT     -> ( IF | FOR | FOREACH | WHILE | RETURN | STATBLOCK | BREAK | CONTINUE | DOWHILE | SWITCH | EXPRSTAT | TRY )
  # EXPRSTAT      -> ASSIGN:? %semi
-# SWITCH        -> %kw_switch %lparen ASSIGN %rparen %lbrace CASE:* %rbrace
+ # SWITCH        -> %kw_switch %lparen ASSIGN %rparen %lbrace CASE:* %rbrace
 # IF            -> %kw_if %lparen ASSIGN %rparen STATEMENT ( %kw_else STATEMENT ):?
 # TRY           -> %kw_try STATBLOCK %kw_catch STATBLOCK
 # FOR           -> %kw_for %lparen ( VAR | EXPRSTAT ) EXPRSTAT ( ASSIGN ( %comma ASSIGN ):* ):? %rparen STATEMENT
@@ -251,7 +251,7 @@ script -> _ ( ( test | import | typedef | funcdef | namespace | using | %semi ) 
     }
 } %}
 
-test -> case {% id %}
+test -> statement {% id %}
 
 import -> %kw_import _ type _ ( %amp _ ):? id _ param_list _ ( func_attr _ ):? %kw_from _ %string _ %semi {% d => {
     return {
@@ -504,7 +504,7 @@ statement -> (
     | break
     | continue
     # | DOWHILE
-    # | SWITCH
+    | switch
     | expr_stat
     # | TRY
 ) {% d => d[0][0] %}
@@ -513,6 +513,14 @@ expr_stat -> ( assign _ ):? %semi {% d => {
     return {
         parse_type: "expr_stat",
         assign:     d[0] ? d[0][0] : null
+    }
+} %}
+
+switch -> %kw_switch _ %lparen _ assign _ %rparen _ %lbrace _ ( case _ ):* %rbrace {% d => {
+    return {
+        parse_type: "switch",
+        assign:     d[4],
+        children:   d[10] ? d[10].map(v => v[0]) : []
     }
 } %}
 
