@@ -203,7 +203,7 @@ const lexer = moo.compile({
 # FOR           -> %kw_for %lparen ( VAR | EXPRSTAT ) EXPRSTAT ( ASSIGN ( %comma ASSIGN ):* ):? %rparen STATEMENT
 # FOREACH       -> %kw_foreach %lparen TYPE %identifier ( %comma TYPE %identifier ):* %colon ASSIGN %rparen STATEMENT
 # WHILE         -> %kw_while %lparen ASSIGN %rparen STATEMENT
-# DOWHILE       -> %kw_do STATEMENT %kw_while %lparen ASSIGN %rparen %semi
+ # DOWHILE       -> %kw_do STATEMENT %kw_while %lparen ASSIGN %rparen %semi
  # RETURN        -> %kw_return ASSIGN:? %semi
  # BREAK         -> %kw_break %semi
  # CONTINUE      -> %kw_continue %semi
@@ -510,7 +510,7 @@ statement -> (
     | stat_block
     | break
     | continue
-    # | DOWHILE
+    | do_while
     | switch
     | expr_stat
     # | TRY
@@ -528,6 +528,14 @@ switch -> %kw_switch _ %lparen _ assign _ %rparen _ %lbrace _ ( case _ ):* %rbra
         parse_type: "switch",
         assign:     d[4],
         children:   d[10] ? d[10].map(v => v[0]) : []
+    }
+} %}
+
+do_while -> %kw_do _ statement _ %kw_while _ %lparen _ assign _ %rparen _ %semi {% d => {
+    return {
+        parse_type: "do_while",
+        do:         d[2],
+        while:      d[8]
     }
 } %}
 
