@@ -278,7 +278,7 @@ namespace -> %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ %lbrace 
 typedef -> %kw_typedef _ prim_type _ %identifier _ %semi {% d => {
     return {
         parse_type: "typedef",
-        old:        d[2],
+        old:        token(d[2]),
         new:        token(d[4])
     }
 } %}
