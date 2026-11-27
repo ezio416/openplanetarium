@@ -213,7 +213,7 @@ const lexer = moo.compile({
  # CONSTRUCTCALL -> TYPE ARGLIST
  # EXPRPREOP     -> %dash | %plus | %bang | %increment | %decrement | %tilde | %at
 # EXPRPOSTOP    -> ( %dot ( FUNCCALL | %identifier ) ) | ( %lbrace ( %identifier %colon ):? ASSIGN ( %comma ( %identifier %colon ):? ASSIGN ):* %rbrace ) | ARGLIST | %increment | %decrement
-# CAST          -> %kw_cast %larrow TYPE %rarrow %lparen ASSIGN %rparen
+ # CAST          -> %kw_cast %larrow TYPE %rarrow %lparen ASSIGN %rparen
  # LITERAL       -> number | %string | boolean | %kw_null
 # LAMBDA        -> %kw_function %lparen ( ( TYPE TYPEMOD ):? %identifier:? ( %comma ( TYPE TYPEMOD ):? %identifier:? ):* ):? %rparen STATBLOCK
  # FUNCCALL      -> SCOPE %identifier TEMPLTYPELIST:? ARGLIST
@@ -258,7 +258,7 @@ script -> _ ( ( test | typedef | namespace | using | %semi ) _ ):* {% d => {
     }
 } %}
 
-test -> var_access _ %semi {% id %}
+test -> cast _ %semi {% id %}
 
 using -> %kw_using _ %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ %semi {% d => {
     ret = {
@@ -411,6 +411,14 @@ expr_pre_op -> (
     | %tilde
     | %at
 ) {% d => token(d[0][0]) %}
+
+cast -> %kw_cast _ %larrow _ type _ %rarrow _ %lparen _ assign _ %rparen {% d => {
+    return {
+        parse_type: "cast",
+        type:       d[4],
+        assign:     d[10]
+    }
+} %}
 
 func_call -> ( scope _ ):? %identifier ( _ templ_type_list ):? _ arg_list {% d => {
     return {
