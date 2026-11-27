@@ -182,7 +182,7 @@ const lexer = moo.compile({
 # MIXIN         -> %kw_mixin CLASS
 # CLASS         -> ( %kw_shared | %kw_abstract | %kw_final | %kw_external ):* %kw_class %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | FUNC | VAR | FUNCDEF ):* %rbrace ) )
 # VAR           -> ( %kw_private | %kw_protected ):? TYPE %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ( %comma %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ):* %semi
-# TYPEDEF       -> %kw_typedef PRIMTYPE %identifier %semi
+ # TYPEDEF       -> %kw_typedef PRIMTYPE %identifier %semi
 # INTFMTHD      -> TYPE %amp:? %identifier PARAMLIST %kw_const:? %semi
 # STATBLOCK     -> %lbrace ( VAR | STATEMENT | USING ):* %rbrace
 # PARAMLIST     -> %lparen ( %kw_void | ( TYPE TYPEMOD ( %ellipses | %identifier:? ( %assign EXPR ):? ) ( %comma TYPE TYPEMOD ( %ellipses | %identifier:? ( %assign EXPR ):? ) ):* ) ):? %rparen
@@ -244,24 +244,24 @@ function idd(d) {
 
 function token(d) {
     return {
-        type:   d.type,
-        value:  d.value !== d.text ? d.value : undefined,
-        text:   d.text,
-        offset: d.offset,
-        line:   d.line,
-        col:    d.col,
+        token_type: d.type,
+        value:      d.value !== d.text ? d.value : undefined,
+        text:       d.text,
+        offset:     d.offset,
+        line:       d.line,
+        col:        d.col,
     }
 }
 
 %}
 
-script -> _ ( ( test | typedef ) _ ):* {% d => {
+script -> _ ( ( test | typedef | using ) _ ):* {% d => {
     return {
         script: d[1].map(v => v[0])
     }
 } %}
 
-test -> using {% id %}
+test -> math_op {% id %}
 
 using -> %kw_using _ %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ %semi {% d => {
     ret = [ token(d[4]) ]
@@ -269,15 +269,16 @@ using -> %kw_using _ %kw_namespace _ %identifier ( _ %scope _ %identifier ):* _ 
         ret.push(...d[5].map(v => token(v[3])))
     }
     return {
-        parse_type: 'using',
+        parse_type: "using",
         ids:        ret
     }
 } %}
 
 typedef -> %kw_typedef _ prim_type _ %identifier _ %semi {% d => {
     return {
-        old: d[2],
-        new: token(d[4])
+        parse_type: "typedef",
+        old:        d[2],
+        new:        token(d[4])
     }
 } %}
 
@@ -286,16 +287,20 @@ type_mod -> %amp ( _ ( %kw_in | %kw_out | %kw_inout ) ):? {% d => {
     if (d.length > 1 && d[1]) {
         ret.push(token(d[1][1][0]))
     }
-    return ret
+    return {
+        parse_type: "type_mod",
+        parts:      ret
+    }
 } %}
 
 type -> ( %kw_const _ ):? ( scope _ ):? data_type ( _ templ_type_list ):? ( _ %lbracket ( _ %rbracket ) | _ %at ( _ %kw_const ):? ):* {% d => {
     return {
-        const: d[0] ? token(d[0][0]) : null,
-        scope: d[1] ? d[1][0] : null,
-        name: d[2],
-        held: d[3] ? d[3][1] : null,
-        mods: d[4].map(v => [
+        parse_type: "type",
+        const:      d[0] ? token(d[0][0]) : null,
+        scope:      d[1] ? d[1][0] : null,
+        name:       d[2],
+        held:       d[3] ? d[3][1] : null,
+        mods:       d[4].map(v => [
             token(v[1]),
             v[2] ? token(v[2][1]) : null
         ])
@@ -307,14 +312,18 @@ templ_type_list -> %larrow _ type ( _ %comma _ type ):* _ %rarrow {% d => {
     if (d[3]) {
         ret.push(...d[3].map(v => v[3]))
     }
-    return ret
+    return {
+        parse_type: "templ_type_list",
+        types:      ret
+    }
 } %}
 
 scope -> ( %scope _ ):? %identifier _ ( %scope _ %identifier _ ):* ( templ_type_list _ ):? %scope {% d => {
     ret = {
-        global: !!d[0],
-        scopes: [ token(d[1]) ],
-        held:   []
+        parse_type: "scope",
+        global:     !!d[0],
+        scopes:     [ token(d[1]) ],
+        held:       []
     }
     if (d[3]) {
         ret.scopes.push(...d[3].map(v => token(v[2])))
@@ -365,8 +374,9 @@ expr_pre_op -> (
 
 var_access -> scope _ %identifier {% d => {
     return {
-        scope: d[0],
-        var: token(d[2])
+        parse_type: "var_access",
+        scope:      d[0],
+        var:        token(d[2])
     }
 } %}
 
@@ -384,7 +394,7 @@ math_op -> (
     | %slash
     | %percent
     | %pow
-) {% idd %}
+) {% d => token(d[0][0]) %}
 
 comp_op -> (
     %eq
@@ -395,7 +405,7 @@ comp_op -> (
     | %gte
     | %kw_is
     | %bang %kw_is
-) {% idd %}
+) {% d => token(d[0][0]) %}
 
 logic_op -> (
     %and
@@ -404,7 +414,7 @@ logic_op -> (
     | %kw_and
     | %kw_or
     | %kw_xor
-) {% idd %}
+) {% d => token(d[0][0]) %}
 
 bit_op -> (
     %amp
@@ -413,7 +423,7 @@ bit_op -> (
     | %lshift
     | %rshift
     | %rlogshift
-) {% idd %}
+) {% d => token(d[0][0]) %}
 
 assign_op -> (
     %assign
@@ -429,7 +439,7 @@ assign_op -> (
     | %lshifteq
     | %rshifteq
     | %rlogshifteq
-) {% idd %}
+) {% d => token(d[0][0]) %}
 
 literal -> number   {% id %}
 literal -> %string  {% d => { d[0].value = d[0].text.slice(1, -1); return token(d[0]) } %}
@@ -448,6 +458,6 @@ number -> (
 boolean -> (
     %kw_false
     | %kw_true
-) {% idd %}
+) {% d => token(d[0][0]) %}
 
 _ -> %whitespace:*
