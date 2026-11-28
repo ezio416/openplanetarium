@@ -1,6 +1,3 @@
-private int& i {
-    get const override {
-        ;
-    }
-    set;
+external interface a : b {
+    void c();
 }

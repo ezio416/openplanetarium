@@ -179,7 +179,7 @@ const lexer = moo.compile({
  # FUNCDEF       -> ( %kw_external | %kw_shared ):* %kw_funcdef TYPE %amp:? %identifier PARAMLIST %semi
 # FUNC          -> ( %kw_shared | %kw_external ):* ( %kw_private | %kw_protected ):? ( ( ( TYPE %amp:? ) | %tilde ) ):? _ %identifier PARAMLIST _ %kw_const:? FUNCATTR ( %semi | STATBLOCK )
  # VIRTPROP      -> ( %kw_private | %kw_protected ):? TYPE %amp:? %identifier %lbrace ( ( %kw_get | %kw_set ) %kw_const:? FUNCATTR ( STATBLOCK | %semi ) ):* %rbrace
-# INTERFACE     -> ( %kw_external | %kw_shared ):* %kw_interface %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | INTFMTHD ):* %rbrace ) )
+ # INTERFACE     -> ( %kw_external | %kw_shared ):* %kw_interface %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | INTFMTHD ):* %rbrace ) )
 # MIXIN         -> %kw_mixin CLASS
 # CLASS         -> ( %kw_shared | %kw_abstract | %kw_final | %kw_external ):* %kw_class %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | FUNC | VAR | FUNCDEF ):* %rbrace ) )
  # VAR           -> ( %kw_private | %kw_protected ):? TYPE %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ( %comma %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ):* %semi
@@ -244,14 +244,14 @@ function token(d) {
 
 %}
 
-script -> _ ( ( test | import | typedef | funcdef | namespace | using | %semi ) _ ):* {% d => {
+script -> _ ( ( test | import | typedef | interface | funcdef | namespace | using | %semi ) _ ):* {% d => {
     return {
         parse_type: "script",
         children:   d[1] ? d[1].map(v => v[0][0]) : []
     }
 } %}
 
-test -> virt_prop {% id %}
+test -> inheritance {% id %}
 
 import -> %kw_import _ type _ ( %amp _ ):? id _ param_list _ ( func_attr _ ):? %kw_from _ %string _ %semi {% d => {
     return {
@@ -317,6 +317,34 @@ virt_prop -> ( ( %kw_private | %kw_protected ) _ ):? type _ ( %amp _ ):? id _ %l
                 stmt:      v[4][0]
             }
         }))
+    }
+    return ret
+} %}
+
+interface -> ( ( %kw_external | %kw_shared ) _ ):* %kw_interface _ id _ %semi {% d => {
+    return {
+        parse_type: "interface",
+        mods:       d[0] ? d[0].map(v => token(v[0][0])) : [],
+        name:       d[3]
+    }
+} %}
+interface -> ( ( %kw_external | %kw_shared ) _ ):* %kw_interface _ id _ ( inheritance _ ):? %lbrace _ ( ( virt_prop | interface_method ) _ ):* %rbrace {% d => {
+    return {
+        parse_type:  "interface",
+        mods:        d[0] ? d[0].map(v => token(v[0][0])) : [],
+        name:        d[3],
+        inheritance: d[5] ? d[5][0] : null,
+        children:    d[8] ? d[8].map(v => v[0][0]) : []
+    }
+} %}
+
+inheritance -> %colon _ id ( _ %comma _ id ):* {% d => {
+    ret = {
+        parse_type: "inheritance",
+        children:   [ d[2] ]
+    }
+    if (d[3]) {
+        ret.children.push(...d[3].map(v => v[3]))
     }
     return ret
 } %}
