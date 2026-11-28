@@ -178,7 +178,7 @@ const lexer = moo.compile({
 # ENUM          -> ( %kw_shared | %kw_external ):* %kw_enum %identifier ( %colon ( %kw_int | %kw_int8 | %kw_int16 | %kw_int32 | %kw_int64 | %kw_uint | %kw_uint8 | %kw_uint16 | %kw_uint32 | %kw_uint64 ) ):? ( %semi | ( %lbrace %identifier ( %assign EXPR ):? ( %comma %identifier ( %assign EXPR ):? ):* %rbrace ) )
  # FUNCDEF       -> ( %kw_external | %kw_shared ):* %kw_funcdef TYPE %amp:? %identifier PARAMLIST %semi
 # FUNC          -> ( %kw_shared | %kw_external ):* ( %kw_private | %kw_protected ):? ( ( ( TYPE %amp:? ) | %tilde ) ):? _ %identifier PARAMLIST _ %kw_const:? FUNCATTR ( %semi | STATBLOCK )
-# VIRTPROP      -> ( %kw_private | %kw_protected ):? TYPE %amp:? %identifier %lbrace ( ( %kw_get | %kw_set ) %kw_const:? FUNCATTR ( STATBLOCK | %semi ) ):* %rbrace
+ # VIRTPROP      -> ( %kw_private | %kw_protected ):? TYPE %amp:? %identifier %lbrace ( ( %kw_get | %kw_set ) %kw_const:? FUNCATTR ( STATBLOCK | %semi ) ):* %rbrace
 # INTERFACE     -> ( %kw_external | %kw_shared ):* %kw_interface %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | INTFMTHD ):* %rbrace ) )
 # MIXIN         -> %kw_mixin CLASS
 # CLASS         -> ( %kw_shared | %kw_abstract | %kw_final | %kw_external ):* %kw_class %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | FUNC | VAR | FUNCDEF ):* %rbrace ) )
@@ -251,7 +251,7 @@ script -> _ ( ( test | import | typedef | funcdef | namespace | using | %semi ) 
     }
 } %}
 
-test -> expr _ %semi {% id %}
+test -> virt_prop {% id %}
 
 import -> %kw_import _ type _ ( %amp _ ):? id _ param_list _ ( func_attr _ ):? %kw_from _ %string _ %semi {% d => {
     return {
@@ -297,6 +297,28 @@ funcdef -> ( ( %kw_external | %kw_shared ) _ ):* %kw_funcdef _ type _ ( %amp _ )
         name:       d[6],
         params:     d[8]
     }
+} %}
+
+virt_prop -> ( ( %kw_private | %kw_protected ) _ ):? type _ ( %amp _ ):? id _ %lbrace _ ( ( %kw_get | %kw_set ) _ ( %kw_const _ ):? ( func_attr _ ):? ( stat_block | %semi ) _ ):* %rbrace {% d => {
+    ret = {
+        parse_type: "virt_prop",
+        vis:        d[0] ? token(d[0][0][0]) : null,
+        type:       d[1],
+        ref:        !!d[3],
+        name:       d[4],
+        children:   []
+    }
+    if (d[8]) {
+        ret.children.push(...d[8].map(v => {
+            return {
+                prop_type: token(v[0][0]),
+                const:     !!v[2],
+                attr:      v[3] ? v[3][0] : null,
+                stmt:      v[4][0]
+            }
+        }))
+    }
+    return ret
 } %}
 
 var -> ( ( %kw_private | %kw_protected ) _ ):? type _ var_assign _ ( %comma _ var_assign _ ):* %semi {% d => {

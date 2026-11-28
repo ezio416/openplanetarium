@@ -1,1 +1,6 @@
-1 + v [ 2 ] ;
+private int& i {
+    get const override {
+        ;
+    }
+    set;
+}
