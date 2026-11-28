@@ -177,7 +177,7 @@ const lexer = moo.compile({
  # NAMESPACE     -> %kw_namespace %identifier ( %scope %identifier ):* %lbrace SCRIPT %rbrace
 # ENUM          -> ( %kw_shared | %kw_external ):* %kw_enum %identifier ( %colon ( %kw_int | %kw_int8 | %kw_int16 | %kw_int32 | %kw_int64 | %kw_uint | %kw_uint8 | %kw_uint16 | %kw_uint32 | %kw_uint64 ) ):? ( %semi | ( %lbrace %identifier ( %assign EXPR ):? ( %comma %identifier ( %assign EXPR ):? ):* %rbrace ) )
  # FUNCDEF       -> ( %kw_external | %kw_shared ):* %kw_funcdef TYPE %amp:? %identifier PARAMLIST %semi
-# FUNC          -> ( %kw_shared | %kw_external ):* ( %kw_private | %kw_protected ):? ( ( ( TYPE %amp:? ) | %tilde ) ):? _ %identifier PARAMLIST _ %kw_const:? FUNCATTR ( %semi | STATBLOCK )
+ # FUNC          -> ( %kw_shared | %kw_external ):* ( %kw_private | %kw_protected ):? ( ( ( TYPE %amp:? ) | %tilde ) ):? %identifier PARAMLIST %kw_const:? FUNCATTR ( %semi | STATBLOCK )
  # VIRTPROP      -> ( %kw_private | %kw_protected ):? TYPE %amp:? %identifier %lbrace ( ( %kw_get | %kw_set ) %kw_const:? FUNCATTR ( STATBLOCK | %semi ) ):* %rbrace
  # INTERFACE     -> ( %kw_external | %kw_shared ):* %kw_interface %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | INTFMTHD ):* %rbrace ) )
 # MIXIN         -> %kw_mixin CLASS
@@ -244,7 +244,7 @@ function token(d) {
 
 %}
 
-script -> _ ( ( test | import | typedef | interface | funcdef | namespace | using | %semi ) _ ):* {% d => {
+script -> _ ( ( test | import | typedef | interface | funcdef | virt_prop | var | func | namespace | using | %semi ) _ ):* {% d => {
     return {
         parse_type: "script",
         children:   d[1] ? d[1].map(v => v[0][0]) : []
@@ -296,6 +296,20 @@ funcdef -> ( ( %kw_external | %kw_shared ) _ ):* %kw_funcdef _ type _ ( %amp _ )
         ref:        !!d[5],
         name:       d[6],
         params:     d[8]
+    }
+} %}
+
+func -> ( ( %kw_shared | %kw_external ) _ ):* ( ( %kw_private | %kw_protected ) _ ):? ( ( type ( _ %amp ):? | %tilde ) _ ):? id _ param_list _ ( %kw_const _ ):? ( func_attr _ ):? ( %semi | stat_block ) {% d => {
+    return {
+        parse_type: "func",
+        mods:       d[0] ? d[0].map(v => token(v[0][0])) : [],
+        vis:        d[1] ? token(d[1][0][0]) : null,
+        type:       d[2] ?? null,
+        name:       d[3],
+        params:     d[5],
+        const:      !!d[7],
+        attr:       d[8] ? d[8][0] : null,
+        stmt:       d[9][0]
     }
 } %}
 

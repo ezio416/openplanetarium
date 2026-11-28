@@ -1,3 +1,3 @@
-external interface a : b {
-    void c();
+void f() {
+    ;
 }
