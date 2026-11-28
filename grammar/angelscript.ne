@@ -638,12 +638,12 @@ expr_term -> ( type _ %assign _ ):? init_list {% d => {
         post:       []
     }
 } %}
-expr_term -> expr_pre_op:* _ expr_value _ expr_post_op:* {% d => {
+expr_term -> ( expr_pre_op _ ):* expr_value ( _ expr_post_op ):* {% d => {
     return {
         parse_type: "expr_term",
         pre:        d[0] ?? [],
-        value:      d[2],
-        post:       d[4] ?? []
+        value:      d[1],
+        post:       d[2] ?? []
     }
 } %}
 
