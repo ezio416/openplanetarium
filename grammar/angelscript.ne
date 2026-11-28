@@ -2,7 +2,9 @@
 # some changes needed to be made as the official reference is not perfect
 
 @{%
+
 const moo = require("moo")
+
 const lexer = moo.compile({
     string: {  // TODO just copied from an example
         match: /"(?:[^\n\\"]|\\["\\ntbfr])*"/,
@@ -167,69 +169,6 @@ const lexer = moo.compile({
         lineBreaks: true
     }
 })
-%}
-
-@lexer lexer
-
-# SCRIPT        -> ( IMPORT | ENUM | TYPEDEF | CLASS | MIXIN | INTERFACE | FUNCDEF | VIRTPROP | VAR | FUNC | NAMESPACE | USING | %semi ):*
- # IMPORT        -> %kw_import TYPE %amp:? %identifier PARAMLIST FUNCATTR %kw_from %string %semi
- # USING         -> %kw_using %kw_namespace %identifier ( %scope %identifier ):* %semi
- # NAMESPACE     -> %kw_namespace %identifier ( %scope %identifier ):* %lbrace SCRIPT %rbrace
-# ENUM          -> ( %kw_shared | %kw_external ):* %kw_enum %identifier ( %colon ( %kw_int | %kw_int8 | %kw_int16 | %kw_int32 | %kw_int64 | %kw_uint | %kw_uint8 | %kw_uint16 | %kw_uint32 | %kw_uint64 ) ):? ( %semi | ( %lbrace %identifier ( %assign EXPR ):? ( %comma %identifier ( %assign EXPR ):? ):* %rbrace ) )
- # FUNCDEF       -> ( %kw_external | %kw_shared ):* %kw_funcdef TYPE %amp:? %identifier PARAMLIST %semi
- # FUNC          -> ( %kw_shared | %kw_external ):* ( %kw_private | %kw_protected ):? ( ( ( TYPE %amp:? ) | %tilde ) ):? %identifier PARAMLIST %kw_const:? FUNCATTR ( %semi | STATBLOCK )
- # VIRTPROP      -> ( %kw_private | %kw_protected ):? TYPE %amp:? %identifier %lbrace ( ( %kw_get | %kw_set ) %kw_const:? FUNCATTR ( STATBLOCK | %semi ) ):* %rbrace
- # INTERFACE     -> ( %kw_external | %kw_shared ):* %kw_interface %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | INTFMTHD ):* %rbrace ) )
- # MIXIN         -> %kw_mixin CLASS
- # CLASS         -> ( %kw_shared | %kw_abstract | %kw_final | %kw_external ):* %kw_class %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | FUNC | VAR | FUNCDEF ):* %rbrace ) )
- # VAR           -> ( %kw_private | %kw_protected ):? TYPE %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ( %comma %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ):* %semi
- # TYPEDEF       -> %kw_typedef PRIMTYPE %identifier %semi
- # INTFMTHD      -> TYPE %amp:? %identifier PARAMLIST %kw_const:? %semi
- # STATBLOCK     -> %lbrace ( VAR | STATEMENT | USING ):* %rbrace
- # PARAMLIST     -> %lparen ( %kw_void | ( TYPE TYPEMOD ( %ellipses | %identifier:? ( %assign EXPR ):? ) ( %comma TYPE TYPEMOD ( %ellipses | %identifier:? ( %assign EXPR ):? ) ):* ) ):? %rparen
- # TYPEMOD       -> ( %amp ( %kw_in | %kw_out | %kw_inout ):? ):?
- # TYPE          -> %kw_const:? SCOPE DATATYPE TEMPLTYPELIST:? ( ( %lbrace %rbrace ) | ( %at %kw_const:? ) ):*
- # TEMPLTYPELIST -> %larrow TYPE ( %comma TYPE ):* %rarrow
- # INITLIST      -> %lbrace ( ASSIGN | INITLIST ):? ( %comma ( ASSIGN | INITLIST ):? ):* %rbrace
- # SCOPE         -> %scope:? ( %identifier %scope ):* ( %identifier TEMPLTYPELIST:? %scope ):?
- # DATATYPE      -> ( %identifier | PRIMTYPE | %question | %kw_auto )
- # PRIMTYPE      -> %kw_void | %kw_int | %kw_int8 | %kw_int16 | %kw_int32 | %kw_int64 | %kw_uint | %kw_uint8 | %kw_uint16 | %kw_uint32 | %kw_uint64 | %kw_float | %kw_double | %kw_bool
- # FUNCATTR      -> ( %kw_override | %kw_final | %kw_explicit | %kw_property | %kw_delete ):*
- # STATEMENT     -> ( IF | FOR | FOREACH | WHILE | RETURN | STATBLOCK | BREAK | CONTINUE | DOWHILE | SWITCH | EXPRSTAT | TRY )
- # EXPRSTAT      -> ASSIGN:? %semi
- # SWITCH        -> %kw_switch %lparen ASSIGN %rparen %lbrace CASE:* %rbrace
- # IF            -> %kw_if %lparen ASSIGN %rparen STATEMENT ( %kw_else STATEMENT ):?
- # TRY           -> %kw_try STATBLOCK %kw_catch STATBLOCK
- # FOR           -> %kw_for %lparen ( VAR | EXPRSTAT ) EXPRSTAT ( ASSIGN ( %comma ASSIGN ):* ):? %rparen STATEMENT
- # FOREACH       -> %kw_foreach %lparen TYPE %identifier ( %comma TYPE %identifier ):* %colon ASSIGN %rparen STATEMENT
- # WHILE         -> %kw_while %lparen ASSIGN %rparen STATEMENT
- # DOWHILE       -> %kw_do STATEMENT %kw_while %lparen ASSIGN %rparen %semi
- # RETURN        -> %kw_return ASSIGN:? %semi
- # BREAK         -> %kw_break %semi
- # CONTINUE      -> %kw_continue %semi
- # EXPR          -> EXPRTERM ( EXPROP EXPRTERM ):*
- # CASE          -> ( ( %kw_case EXPR ) | %kw_default ) %colon STATEMENT:*
- # EXPRTERM      -> ( ( TYPE %assign ):? INITLIST ) | ( EXPRPREOP:* EXPRVALUE EXPRPOSTOP:* )
- # EXPRVALUE     -> %kw_void | CONSTRUCTCALL | FUNCCALL | VARACCESS | CAST | LITERAL | %lparen ASSIGN %rparen | LAMBDA
- # CONSTRUCTCALL -> TYPE ARGLIST
- # EXPRPREOP     -> %dash | %plus | %bang | %increment | %decrement | %tilde | %at
- # EXPRPOSTOP    -> ( %dot ( FUNCCALL | %identifier ) ) | ( %lbrace ( %identifier %colon ):? ASSIGN ( %comma ( %identifier %colon ):? ASSIGN ):* %rbrace ) | ARGLIST | %increment | %decrement
- # CAST          -> %kw_cast %larrow TYPE %rarrow %lparen ASSIGN %rparen
- # LITERAL       -> number | %string | boolean | %kw_null
- # LAMBDA        -> %kw_function %lparen ( ( TYPE TYPEMOD ):? %identifier:? ( %comma ( TYPE TYPEMOD ):? %identifier:? ):* ):? %rparen STATBLOCK
- # FUNCCALL      -> SCOPE %identifier TEMPLTYPELIST:? ARGLIST
- # VARACCESS     -> SCOPE %identifier
- # ARGLIST       -> %lparen ( %identifier %colon ):? ASSIGN ( %comma ( %identifier %colon ):? ASSIGN ):* %rparen
- # ASSIGN        -> CONDITION ( ASSIGNOP ASSIGN ):?
- # CONDITION     -> EXPR ( %question ASSIGN %colon ASSIGN ):?
- # EXPROP        -> MATHOP | COMPOP | LOGICOP | BITOP
- # MATHOP        -> %plus | %dash | %star | %slash | %percent | %pow
- # COMPOP        -> %eq | %neq | %larrow | %lte | %rarrow | %gte | %kw_is | %bang %kw_is
- # LOGICOP       -> %and | %or | %xor | %kw_and | %kw_or | %kw_xor
- # BITOP         -> %amp | %bar | %carrot | %lshift | %rshift | %rlogshift
- # ASSIGNOP      -> %assign | %pluseq | %minuseq | %timeseq | %diveq | %oreq | %andeq | %xoreq | %modeq | %poweq | %lshifteq | %rshifteq | %rlogshifteq
-
-@{%
 
 function token(d) {
     return {
@@ -244,7 +183,9 @@ function token(d) {
 
 %}
 
-script -> _ ( ( test | import | typedef | class | mixin | interface | funcdef | virt_prop | var | func | namespace | using | %semi ) _ ):* {% d => {
+@lexer lexer
+
+script -> _ ( ( test | import | enum | typedef | class | mixin | interface | funcdef | virt_prop | var | func | namespace | using | %semi ) _ ):* {% d => {
     return {
         parse_type: "script",
         children:   d[1] ? d[1].map(v => v[0][0]) : []
@@ -284,6 +225,35 @@ namespace -> %kw_namespace _ id ( _ %scope _ id ):* _ %lbrace script %rbrace {% 
     }
     if (d[3]) {
         ret.ids.push(...d[3].map(v => v[3]))
+    }
+    return ret
+} %}
+
+enum -> ( ( %kw_shared | %kw_external ) _ ):* %kw_enum _ id _ ( %colon _ int_type _ ):? %semi {% d => {
+    return {
+        parse_type: "enum",
+        mods:       d[0] ? d[0].map(v => token(v[0][0])) : [],
+        name:       d[3]
+    }
+} %}
+enum -> ( ( %kw_shared | %kw_external ) _ ):* %kw_enum _ id _ ( %colon _ int_type _ ):? %lbrace _ id _ ( %assign _ expr _ ):? ( %comma _ id _ ( %assign _ expr _ ):? ):* %rbrace {% d => {
+    ret = {
+        parse_type: "enum",
+        mods:       d[0] ? d[0].map(v => token(v[0][0])) : [],
+        name:       d[3],
+        type:       d[5] ? token(d[5][2]) : null,
+        children:   [ {
+            key:   d[8],
+            value: d[10] ? d[10][2] : null
+        } ]
+    }
+    if (d[11]) {
+        ret.children.push(...d[11].map(v => {
+            return {
+                key:   v[2],
+                value: v[4] ? v[4][2] : null
+            }
+        }))
     }
     return ret
 } %}
@@ -553,6 +523,13 @@ data_type -> (
 ) {% d => token(d[0][0]) %}
 
 prim_type -> (
+    int_type
+    | %kw_float
+    | %kw_double
+    | %kw_bool
+) {% d => d[0][0] %}
+
+int_type -> (
     %kw_int
     | %kw_int8
     | %kw_int16
@@ -563,9 +540,6 @@ prim_type -> (
     | %kw_uint16
     | %kw_uint32
     | %kw_uint64
-    | %kw_float
-    | %kw_double
-    | %kw_bool
 ) {% d => d[0][0] %}
 
 func_attr -> func_attr_kw ( _ func_attr_kw ):* {% d => {

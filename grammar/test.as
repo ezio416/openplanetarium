@@ -1,5 +1,4 @@
-mixin shared final class A : B {
-    void f(int& i) const override {
-        return;
-    }
+enum E : int {
+    a = -1,
+    b
 }
