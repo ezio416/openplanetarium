@@ -185,14 +185,12 @@ function token(d) {
 
 @lexer lexer
 
-script -> _ ( ( test | import | enum | typedef | class | mixin | interface | funcdef | virt_prop | var | func | namespace | using | %semi ) _ ):* {% d => {
+script -> _ ( ( import | enum | typedef | class | mixin | interface | funcdef | virt_prop | var | func | namespace | using | %semi ) _ ):* {% d => {
     return {
         parse_type: "script",
         children:   d[1] ? d[1].map(v => v[0][0]) : []
     }
 } %}
-
-test -> inheritance {% id %}
 
 import -> %kw_import _ type _ ( %amp _ ):? id _ param_list _ ( func_attr _ ):? %kw_from _ %string _ %semi {% d => {
     return {
@@ -206,25 +204,25 @@ import -> %kw_import _ type _ ( %amp _ ):? id _ param_list _ ( func_attr _ ):? %
     }
 } %}
 
-using -> %kw_using _ %kw_namespace _ id ( _ %scope _ id ):* _ %semi {% d => {
+using -> %kw_using _ %kw_namespace _ id _ ( %scope _ id _ ):* %semi {% d => {
     ret = {
         parse_type: "using",
         ids:        [ d[4] ]
     }
-    if (d[5]) {
-        ret.ids.push(...d[5].map(v => v[3]))
+    if (d[6]) {
+        ret.ids.push(...d[6].map(v => v[2]))
     }
     return ret
 } %}
 
-namespace -> %kw_namespace _ id ( _ %scope _ id ):* _ %lbrace script %rbrace {% d => {
+namespace -> %kw_namespace _ id _ ( %scope _ id _ ):* %lbrace script %rbrace {% d => {
     ret = {
         parse_type: "namespace",
         ids:        [ d[2] ],
         script:     d[6]
     }
-    if (d[3]) {
-        ret.ids.push(...d[3].map(v => v[3]))
+    if (d[4]) {
+        ret.ids.push(...d[4].map(v => v[2]))
     }
     return ret
 } %}
@@ -233,7 +231,8 @@ enum -> ( ( %kw_shared | %kw_external ) _ ):* %kw_enum _ id _ ( %colon _ int_typ
     return {
         parse_type: "enum",
         mods:       d[0] ? d[0].map(v => token(v[0][0])) : [],
-        name:       d[3]
+        name:       d[3],
+        type:       d[5] ? token(d[5][2]) : null
     }
 } %}
 enum -> ( ( %kw_shared | %kw_external ) _ ):* %kw_enum _ id _ ( %colon _ int_type _ ):? %lbrace _ id _ ( %assign _ expr _ ):? ( %comma _ id _ ( %assign _ expr _ ):? ):* %rbrace {% d => {
@@ -436,13 +435,13 @@ param_list_inner -> param_list_item ( _ %comma _ param_list_item ):* {% d => {
     return ret
 } %}
 
-param_list_item -> type ( _ type_mod ):? _ ( %ellipses | %identifier ( _ %assign _ expr ):? ) {% d => {
+param_list_item -> type _ ( type_mod _ ):? ( %ellipses | %identifier ( _ %assign _ expr ):? ) {% d => {
     return {
         parse_type: "param_list_item",
         type:       d[0],
-        type_mod:   d[1] ? d[1][1] : null,
+        type_mod:   d[2] ? d[2][0] : null,
         key:        token(d[3][0]),
-        value:      d[3] && d[3].length === 2 && d[3][1] ? d[3][1][3] : null
+        value:      d[3].length === 2 && d[3][1] ? d[3][1][3] : null
     }
 } %}
 
@@ -471,13 +470,13 @@ type -> ( %kw_const _ ):? ( scope _ ):? data_type ( _ templ_type_list ):? ( _ %l
     }
 } %}
 
-templ_type_list -> %larrow _ type ( _ %comma _ type ):* _ %rarrow {% d => {
+templ_type_list -> %larrow _ type _ ( %comma _ type _ ):* %rarrow {% d => {
     ret = {
         parse_type: "templ_type_list",
         children:   [ d[2] ]
     }
-    if (d[3]) {
-        ret.children.push(...d[3].map(v => v[3]))
+    if (d[4]) {
+        ret.children.push(...d[4].map(v => v[2]))
     }
     return ret
 } %}
@@ -608,7 +607,7 @@ try -> %kw_try _ stat_block _ %kw_catch _ stat_block {% d => {
     }
 } %}
 
-for -> %kw_for _ %lparen _ ( var | expr_stat ) _ expr_stat _ ( assign ( _ %comma _ assign ):* _ ):? %rparen _ statement {% d => {
+for -> %kw_for _ %lparen _ ( var | expr_stat ) _ expr_stat _ ( assign _ ( %comma _ assign _ ):* ):? %rparen _ statement {% d => {
     ret = {
         parse_type: "for",
         init:       d[4][0],
@@ -618,8 +617,8 @@ for -> %kw_for _ %lparen _ ( var | expr_stat ) _ expr_stat _ ( assign ( _ %comma
     }
     if (d[8]) {
         ret.post.push(d[8][0])
-        if (d[8][1]) {
-            ret.post.push(...d[8][1].map(v => v[3]))
+        if (d[8][2]) {
+            ret.post.push(...d[8][2].map(v => v[2]))
         }
     }
     return ret
@@ -810,12 +809,12 @@ lambda_item -> ( type _ type_mod _ ):? id:? {% d => {
     }
 } %}
 
-func_call -> ( scope _ ):? id ( _ templ_type_list ):? _ arg_list {% d => {
+func_call -> ( scope _ ):? id _ ( templ_type_list _ ):? arg_list {% d => {
     return {
         parse_type: "func_call",
         scope:      d[0] ? d[0][0] : null,
         name:       d[1],
-        template:   d[2] ? d[2][1] : null,
+        template:   d[3] ? d[3][0] : null,
         args:       d[4]
     }
 } %}
