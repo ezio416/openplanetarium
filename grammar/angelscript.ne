@@ -209,7 +209,7 @@ const lexer = moo.compile({
  # CONTINUE      -> %kw_continue %semi
 # EXPR          -> EXPRTERM ( EXPROP EXPRTERM ):*
  # CASE          -> ( ( %kw_case EXPR ) | %kw_default ) %colon STATEMENT:*
-# EXPRTERM      -> ( ( TYPE %assign ):? INITLIST ) | ( EXPRPREOP:* EXPRVALUE EXPRPOSTOP:* )
+ # EXPRTERM      -> ( ( TYPE %assign ):? INITLIST ) | ( EXPRPREOP:* EXPRVALUE EXPRPOSTOP:* )
  # EXPRVALUE     -> %kw_void | CONSTRUCTCALL | FUNCCALL | VARACCESS | CAST | LITERAL | %lparen ASSIGN %rparen | LAMBDA
  # CONSTRUCTCALL -> TYPE ARGLIST
  # EXPRPREOP     -> %dash | %plus | %bang | %increment | %decrement | %tilde | %at
@@ -251,7 +251,7 @@ script -> _ ( ( test | import | typedef | funcdef | namespace | using | %semi ) 
     }
 } %}
 
-test -> expr_value {% id %}
+test -> expr_term {% id %}
 
 import -> %kw_import _ type _ ( %amp _ ):? id _ param_list _ ( func_attr _ ):? %kw_from _ %string _ %semi {% d => {
     return {
@@ -625,6 +625,25 @@ case -> ( %kw_case _ expr | %kw_default ) _ %colon ( _ statement ):* {% d => {
         parse_type: "case",
         label:      d[0],
         children:   d[3] ? d[3].map(v => v[1]) : []
+    }
+} %}
+
+# first group is ignored, I don't understand this
+# something like "int = { }" is valid under this rule - why?
+expr_term -> ( type _ %assign _ ):? init_list {% d => {
+    return {
+        parse_type: "expr_term",
+        pre:        [],
+        value:      d[1],
+        post:       []
+    }
+} %}
+expr_term -> expr_pre_op:* _ expr_value _ expr_post_op:* {% d => {
+    return {
+        parse_type: "expr_term",
+        pre:        d[0] ?? [],
+        value:      d[2],
+        post:       d[4] ?? []
     }
 } %}
 

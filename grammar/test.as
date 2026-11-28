@@ -1,1 +1,1 @@
-function ( a , b ) { }
+const int = { 1, 2 }
