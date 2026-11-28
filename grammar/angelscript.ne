@@ -180,7 +180,7 @@ const lexer = moo.compile({
  # FUNC          -> ( %kw_shared | %kw_external ):* ( %kw_private | %kw_protected ):? ( ( ( TYPE %amp:? ) | %tilde ) ):? %identifier PARAMLIST %kw_const:? FUNCATTR ( %semi | STATBLOCK )
  # VIRTPROP      -> ( %kw_private | %kw_protected ):? TYPE %amp:? %identifier %lbrace ( ( %kw_get | %kw_set ) %kw_const:? FUNCATTR ( STATBLOCK | %semi ) ):* %rbrace
  # INTERFACE     -> ( %kw_external | %kw_shared ):* %kw_interface %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | INTFMTHD ):* %rbrace ) )
-# MIXIN         -> %kw_mixin CLASS
+ # MIXIN         -> %kw_mixin CLASS
  # CLASS         -> ( %kw_shared | %kw_abstract | %kw_final | %kw_external ):* %kw_class %identifier ( %semi | ( ( %colon %identifier ( %comma %identifier ):* ):? %lbrace ( VIRTPROP | FUNC | VAR | FUNCDEF ):* %rbrace ) )
  # VAR           -> ( %kw_private | %kw_protected ):? TYPE %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ( %comma %identifier ( ( %assign ( INITLIST | EXPR ) ) | ARGLIST ):? ):* %semi
  # TYPEDEF       -> %kw_typedef PRIMTYPE %identifier %semi
@@ -244,7 +244,7 @@ function token(d) {
 
 %}
 
-script -> _ ( ( test | import | typedef | class | interface | funcdef | virt_prop | var | func | namespace | using | %semi ) _ ):* {% d => {
+script -> _ ( ( test | import | typedef | class | mixin | interface | funcdef | virt_prop | var | func | namespace | using | %semi ) _ ):* {% d => {
     return {
         parse_type: "script",
         children:   d[1] ? d[1].map(v => v[0][0]) : []
@@ -361,6 +361,11 @@ inheritance -> %colon _ id ( _ %comma _ id ):* {% d => {
         ret.children.push(...d[3].map(v => v[3]))
     }
     return ret
+} %}
+
+mixin -> %kw_mixin _ class {% d => {
+    d[2].mods.splice(0, 0, token(d[0]))
+    return d[2]
 } %}
 
 class -> ( ( %kw_shared | %kw_abstract | %kw_final | %kw_external ) _ ):* %kw_class _ id _ %semi {% d => {
