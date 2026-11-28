@@ -851,9 +851,9 @@ bit_op -> (
     %amp
     | %bar
     | %carrot
-    | %lshift
-    | %rshift
-    | %rlogshift
+    # | %lshift
+    # | %rshift
+    # | %rlogshift
 ) {% d => token(d[0][0]) %}
 
 assign_op -> (
