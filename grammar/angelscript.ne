@@ -748,18 +748,11 @@ expr_post_op -> arg_list {% d => {
         children:   d[0].children
     }
 } %}
-expr_post_op -> %dot _ func_call {% d => {
+expr_post_op -> %dot _ ( func_call | id ) {% d => {
     return {
         parse_type: "expr_post_op",
         sub_type:   "dot",
-        children:   [ d[2] ]
-    }
-} %}
-expr_post_op -> %dot _ id {% d => {
-    return {
-        parse_type: "expr_post_op",
-        sub_type:   "dot",
-        children:   [ d[2] ]
+        children:   [ d[2][0] ]
     }
 } %}
 expr_post_op -> ( %increment | %decrement ) {% d => {
